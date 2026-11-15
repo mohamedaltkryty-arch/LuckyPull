@@ -73,7 +73,11 @@ jobs:
           cd "${PROJECT_DIR}"
           sed -i -E 's|^gradle_build/min_sdk=.*$|gradle_build/min_sdk=""|' export_presets.cfg
           sed -i -E 's|^gradle_build/target_sdk=.*$|gradle_build/target_sdk=""|' export_presets.cfg
+          grep -q '^textures/vram_compression/import_etc2_astc=' project.godot || \
+            sed -i '/^\[rendering\]/a textures/vram_compression/import_etc2_astc=true' project.godot
+          grep -E '^textures/vram_compression/import_etc2_astc=' project.godot
           grep -E '^gradle_build/(use_gradle_build|min_sdk|target_sdk)=' export_presets.cfg
+          rm -rf .godot/imported
           godot --headless --editor --path . --quit
 
       - name: Create temporary Android debug signing key
