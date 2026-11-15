@@ -66,11 +66,14 @@ jobs:
           test -f .build-source/LuckyPull_Godot4/project.godot
           echo "PROJECT_DIR=${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4" >> "${GITHUB_ENV}"
 
-      - name: Import and validate Godot project
+      - name: Normalize Android export preset and validate project
         shell: bash
         run: |
           set -euo pipefail
           cd "${PROJECT_DIR}"
+          sed -i -E 's|^gradle_build/min_sdk=.*$|gradle_build/min_sdk=""|' export_presets.cfg
+          sed -i -E 's|^gradle_build/target_sdk=.*$|gradle_build/target_sdk=""|' export_presets.cfg
+          grep -E '^gradle_build/(use_gradle_build|min_sdk|target_sdk)=' export_presets.cfg
           godot --headless --editor --path . --quit
 
       - name: Create temporary Android debug signing key
