@@ -52,7 +52,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/*.part-* > LuckyPull_Godot4_Project.tar.gz.b64
+          cat \
+  project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-01 \
+  project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-02 \
+  project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-03 \
+  project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-04 \
+  > LuckyPull_Godot4_Project.tar.gz.b64
           base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
           echo "ddbbfaadbababace5bf5f1eb45c64a9bcc9a05300b6ed7d5c333777d5188f867  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
