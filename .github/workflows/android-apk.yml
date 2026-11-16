@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/LuckyPull_Godot4_v0.3.3.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
+          cat project-payload/LuckyPull_Godot4_v0.3.4.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
           base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "37df8ff4d95fdcdc4925884437c036693f771b17c89f8dfe5731413b8cea47bd  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          echo "3036ab7733b3727a4f0420def64cf2ef7c88e90b19f773f0db07b15e8150fa5e  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
@@ -79,9 +79,9 @@ jobs:
           test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
-          grep -q '^config/version="0.3.3"$' project.godot
-          grep -q '^version/name="0.3.3"$' export_presets.cfg
-          grep -q '^version/code=3$' export_presets.cfg
+          grep -q '^config/version="0.3.4"$' project.godot
+          grep -q '^version/name="0.3.4"$' export_presets.cfg
+          grep -q '^version/code=4$' export_presets.cfg
           grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
       - name: Test save recovery and published odds
@@ -142,7 +142,7 @@ jobs:
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.3.3-Android-Debug-APK
+          name: LuckyPull-v0.3.4-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
           if-no-files-found: error
           retention-days: 14
