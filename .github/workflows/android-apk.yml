@@ -75,6 +75,8 @@ jobs:
           rm -rf .godot/imported
           godot --headless --editor --path . --quit
           test -s assets/fonts/NotoSansArabic-Regular.ttf
+          test -s assets/fonts/NotoSansArabic-SemiBold.ttf
+          test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
 
