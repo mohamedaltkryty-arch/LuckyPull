@@ -52,14 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat \
-            project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-01 \
-            project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-02 \
-            project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-03 \
-            project-payload/LuckyPull_Godot4_Project.tar.gz.b64.part-04 \
-            > LuckyPull_Godot4_Project.tar.gz.b64
+          cat project-payload/LuckyPull_Godot4_v0.3.0.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
           base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "ddbbfaadbababace5bf5f1eb45c64a9bcc9a05300b6ed7d5c333777d5188f867  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          echo "3f8a2e0a99dafc26f777886481e7f5a4723ba381881bd93add81fa92c38563ea  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
@@ -124,7 +119,7 @@ jobs:
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-Android-Debug-APK
+          name: LuckyPull-v0.3.0-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
           if-no-files-found: error
           retention-days: 14
