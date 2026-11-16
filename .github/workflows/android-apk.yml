@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/LuckyPull_Godot4_v0.3.0.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
+          cat project-payload/LuckyPull_Godot4_v0.3.1.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
           base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "3f8a2e0a99dafc26f777886481e7f5a4723ba381881bd93add81fa92c38563ea  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          echo "b5cf129fe974c37d637b27db4e0341b5b235af0511a2c24dd138b9dc63f9fb4a  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
@@ -74,6 +74,16 @@ jobs:
           grep -E '^gradle_build/(use_gradle_build|min_sdk|target_sdk)=' export_presets.cfg
           rm -rf .godot/imported
           godot --headless --editor --path . --quit
+          test -s assets/fonts/NotoSansArabic-Regular.ttf
+          test -s assets/fonts/NotoSansSymbols2-Regular.ttf
+          grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
+
+      - name: Launch game scene headlessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          godot --headless --path . --quit-after 3
 
       - name: Create temporary Android debug signing key
         shell: bash
@@ -119,7 +129,7 @@ jobs:
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.3.0-Android-Debug-APK
+          name: LuckyPull-v0.3.1-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
           if-no-files-found: error
           retention-days: 14
