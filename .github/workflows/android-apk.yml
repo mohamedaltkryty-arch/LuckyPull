@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/LuckyPull_Godot4_v0.3.2.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
+          cat project-payload/LuckyPull_Godot4_v0.3.3.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
           base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "a29308e1fcb55b75e897e242053ca208814c55792801be6cca1c87c4e303d404  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          echo "81ea981acd7f78608b19a5575bea43b4c007649ad2eb73d5776c397368bea085  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
@@ -79,6 +79,13 @@ jobs:
           test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
+          grep -q '^config/version="0.3.3"
+      - name: Test save recovery and published odds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          godot --headless --path . --script res://tests/save_recovery_test.gd
 
       - name: Launch game scene headlessly
         shell: bash
@@ -131,7 +138,180 @@ jobs:
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.3.2-Android-Debug-APK
+          name: LuckyPull-v0.3.3-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
+          if-no-files-found: error
+          retention-days: 14
+ project.godot
+          grep -q '^version/name="0.3.3"
+      - name: Launch game scene headlessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          godot --headless --path . --quit-after 3
+
+      - name: Create temporary Android debug signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}"
+          keytool -genkeypair -noprompt -v \
+            -keystore "${RUNNER_TEMP}/luckypull-debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Lucky Pull,C=IQ"
+
+      - name: Export Android APK
+        shell: bash
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/luckypull-debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          mkdir -p build
+          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android.apk"
+          test -s build/LuckyPull-Android.apk
+          unzip -t build/LuckyPull-Android.apk >/dev/null
+          sha256sum build/LuckyPull-Android.apk
+          APK_SIGNER=""
+          if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
+            APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
+          elif command -v apksigner >/dev/null 2>&1; then
+            APK_SIGNER="$(command -v apksigner)"
+          else
+            APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
+          fi
+          if [[ -z "${APK_SIGNER}" ]]; then
+            echo "Android apksigner was not found; cannot verify APK signature."
+            exit 1
+          fi
+          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android.apk
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuckyPull-v0.3.3-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
+          if-no-files-found: error
+          retention-days: 14
+ export_presets.cfg
+          grep -q '^version/code=3
+      - name: Launch game scene headlessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          godot --headless --path . --quit-after 3
+
+      - name: Create temporary Android debug signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}"
+          keytool -genkeypair -noprompt -v \
+            -keystore "${RUNNER_TEMP}/luckypull-debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Lucky Pull,C=IQ"
+
+      - name: Export Android APK
+        shell: bash
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/luckypull-debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          mkdir -p build
+          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android.apk"
+          test -s build/LuckyPull-Android.apk
+          unzip -t build/LuckyPull-Android.apk >/dev/null
+          sha256sum build/LuckyPull-Android.apk
+          APK_SIGNER=""
+          if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
+            APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
+          elif command -v apksigner >/dev/null 2>&1; then
+            APK_SIGNER="$(command -v apksigner)"
+          else
+            APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
+          fi
+          if [[ -z "${APK_SIGNER}" ]]; then
+            echo "Android apksigner was not found; cannot verify APK signature."
+            exit 1
+          fi
+          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android.apk
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuckyPull-v0.3.3-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
+          if-no-files-found: error
+          retention-days: 14
+ export_presets.cfg
+          grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
+          test -s tests/save_recovery_test.gd
+
+      - name: Launch game scene headlessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          godot --headless --path . --quit-after 3
+
+      - name: Create temporary Android debug signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}"
+          keytool -genkeypair -noprompt -v \
+            -keystore "${RUNNER_TEMP}/luckypull-debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Lucky Pull,C=IQ"
+
+      - name: Export Android APK
+        shell: bash
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/luckypull-debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          set -euo pipefail
+          cd "${PROJECT_DIR}"
+          mkdir -p build
+          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android.apk"
+          test -s build/LuckyPull-Android.apk
+          unzip -t build/LuckyPull-Android.apk >/dev/null
+          sha256sum build/LuckyPull-Android.apk
+          APK_SIGNER=""
+          if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
+            APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
+          elif command -v apksigner >/dev/null 2>&1; then
+            APK_SIGNER="$(command -v apksigner)"
+          else
+            APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
+          fi
+          if [[ -z "${APK_SIGNER}" ]]; then
+            echo "Android apksigner was not found; cannot verify APK signature."
+            exit 1
+          fi
+          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android.apk
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuckyPull-v0.3.3-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
           if-no-files-found: error
           retention-days: 14

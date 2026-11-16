@@ -6,13 +6,13 @@
 
 - كل دفع إلى فرع `main` يشغّل GitHub Actions.
 - يمكن تشغيل البناء يدوياً من تبويب **Actions** عبر **Build Lucky Pull Android APK**.
-- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.3.0-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
+- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.3.3-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
 
 الـAPK الناتج نسخة Debug للاختبار والتثبيت، ويوقّع بمفتاح مؤقت ينشأ داخل عملية البناء. لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف، وليس إصدار Release للنشر العام.
 
 ## بنية الملفات
 
-- `project-payload/LuckyPull_Godot4_v0.3.0.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
+- `project-payload/LuckyPull_Godot4_v0.3.3.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
 - `.github/workflows/android-apk.yml`: مسار البناء والتحقق ورفع APK كـArtifact.
 
 ## مواصفات بناء Android
@@ -38,3 +38,13 @@
 - Complete text hierarchy refresh across all game screens.
 - Embedded Arabic Regular, SemiBold, and Bold font weights.
 - Larger small text, clearer button labels, and consistent line spacing.
+
+
+## Version 0.3.3 — Save Recovery Protection
+
+- Prevents an older build from overwriting a save created by a newer build.
+- Recovers a corrupt primary save from a valid backup without replacing a future-version primary.
+- Verifies temporary writes and backup rotation before promoting a new save.
+- Shows an Arabic/English recovery warning and disables daily claims while recovery is read-only.
+- Adds automated Godot smoke tests for save recovery, legacy migration, and probability totals.
+- Synchronizes Android version metadata to 0.3.3 (version code 3).
