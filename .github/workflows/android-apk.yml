@@ -79,7 +79,11 @@ jobs:
           test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
-          grep -q '^config/version="0.3.3"
+          grep -q '^config/version="0.3.3"$' project.godot
+          grep -q '^version/name="0.3.3"$' export_presets.cfg
+          grep -q '^version/code=3$' export_presets.cfg
+          grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
+          test -s tests/save_recovery_test.gd
       - name: Test save recovery and published odds
         shell: bash
         run: |
