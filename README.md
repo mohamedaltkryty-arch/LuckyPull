@@ -31,3 +31,10 @@
 - New colorful cosmic visual identity and reworked Arabic RTL mobile screens.
 - New Lucky Pull app icon and Android launcher icon.
 - New animated pull interaction, custom reward dialog, refreshed cards, missions and chest screens.
+
+
+## Version 0.3.2 — Typography Refresh
+
+- Complete text hierarchy refresh across all game screens.
+- Embedded Arabic Regular, SemiBold, and Bold font weights.
+- Larger small text, clearer button labels, and consistent line spacing.
