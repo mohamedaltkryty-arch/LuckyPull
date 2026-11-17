@@ -67,7 +67,7 @@ jobs:
           PATCH_FILE="${RUNNER_TEMP}/luckypull-v0.4.0.patch"
           if ! command -v xz >/dev/null 2>&1; then
             apt-get update -qq
-            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq xz-utils
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq xz-utils patch
           fi
           base64 --decode project-payload/LuckyPull-v0.4.0.patch.xz.b64 > "${PATCH_XZ}"
           xz --test "${PATCH_XZ}"
