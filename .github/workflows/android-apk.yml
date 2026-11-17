@@ -63,11 +63,18 @@ jobs:
         run: |
           set -euo pipefail
           PROJECT_DIR="${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4"
-          PATCH_XZ="${RUNNER_TEMP}/luckypull-v0.4.0.patch.xz"
           PATCH_FILE="${RUNNER_TEMP}/luckypull-v0.4.0.patch"
-          base64 --decode project-payload/LuckyPull-v0.4.0.patch.xz.b64 > "${PATCH_XZ}"
-          xz --test "${PATCH_XZ}"
-          xz --decompress --stdout "${PATCH_XZ}" > "${PATCH_FILE}"
+          python3 - <<'PY'
+          import base64
+          import lzma
+          source = "project-payload/LuckyPull-v0.4.0.patch.xz.b64"
+          target = "${RUNNER_TEMP}/luckypull-v0.4.0.patch"
+          with open(source, "rt", encoding="ascii") as handle:
+              compressed = base64.b64decode(handle.read())
+          patch_data = lzma.decompress(compressed)
+          with open(target, "wb") as handle:
+              handle.write(patch_data)
+          PY
           cd "${PROJECT_DIR}"
           patch --batch --forward --strip=1 --dry-run < "${PATCH_FILE}"
           patch --batch --forward --strip=1 < "${PATCH_FILE}"
