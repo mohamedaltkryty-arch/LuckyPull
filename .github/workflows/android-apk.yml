@@ -45,45 +45,17 @@ jobs:
           keytool -help >/dev/null 2>&1
           test -f "${TEMPLATE_TARGET}/android_debug.apk"
 
-      - name: Reconstruct v0.3.4 base project
+      - name: Reconstruct v0.4.1 source project
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/LuckyPull_Godot4_v0.3.4.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz.b64
-          base64 --decode LuckyPull_Godot4_Project.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "3036ab7733b3727a4f0420def64cf2ef7c88e90b19f773f0db07b15e8150fa5e  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          base64 --decode project-payload/LuckyPull_Godot4_v0.4.1.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
+          echo "f513afa5b41e4cb744cb095f5a00d6d91ef5827f3610f7371e0f5d5b68483eff  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
           test -f .build-source/LuckyPull_Godot4/project.godot
           echo "PROJECT_DIR=${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4" >> "${GITHUB_ENV}"
-
-      - name: Apply v0.4.0 card collections and pity patch
-        shell: bash
-        run: |
-          set -euo pipefail
-          PROJECT_DIR="${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4"
-          PATCH_XZ="${RUNNER_TEMP}/luckypull-v0.4.0.patch.xz"
-          PATCH_FILE="${RUNNER_TEMP}/luckypull-v0.4.0.patch"
-          if ! command -v xz >/dev/null 2>&1; then
-            apt-get update -qq
-            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq xz-utils patch
-          fi
-          base64 --decode project-payload/LuckyPull-v0.4.0.patch.xz.b64 > "${PATCH_XZ}"
-          xz --test "${PATCH_XZ}"
-          xz --decompress --stdout "${PATCH_XZ}" > "${PATCH_FILE}"
-          cd "${PROJECT_DIR}"
-          patch --batch --forward --strip=2 --dry-run < "${PATCH_FILE}"
-          patch --batch --forward --strip=2 < "${PATCH_FILE}"
-          grep -q '^config/version=' project.godot
-          grep -q '^version/name=' export_presets.cfg
-          grep -q '^version/code=' export_presets.cfg
-          sed -i -E 's|^config/version=.*$|config/version="0.4.0"|' project.godot
-          sed -i -E 's|^version/name=.*$|version/name="0.4.0"|' export_presets.cfg
-          sed -i -E 's|^version/code=.*$|version/code=5|' export_presets.cfg
-          grep -qi 'collection' scripts/game_state.gd
-          grep -qi 'pity' scripts/game_state.gd
-          echo "Applied v0.4.0 card-collection and pity patch."
 
       - name: Normalize Android export preset and validate project
         shell: bash
@@ -101,14 +73,16 @@ jobs:
           test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
-          grep -q '^config/version="0.4.0"$' project.godot
-          grep -q '^version/name="0.4.0"$' export_presets.cfg
-          grep -q '^version/code=5$' export_presets.cfg
+          grep -q '^config/version="0.4.1"$' project.godot
+          grep -q '^version/name="0.4.1"$' export_presets.cfg
+          grep -q '^version/code=6$' export_presets.cfg
           grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
-          grep -qi 'collection' scripts/game_state.gd
+          grep -q 'CARD_SETS' scripts/game_state.gd
+          grep -q 'func get_base_odds()' scripts/game_state.gd
+          grep -q 'var reward := _roll_reward(false)' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
 
-      - name: Test save recovery, card collections, and published odds
+      - name: Test save recovery, card collections, pity scope, and published odds
         shell: bash
         run: |
           set -euo pipefail
@@ -160,18 +134,19 @@ jobs:
           test -n "${APK_SIGNER}"
           "${APK_SIGNER}" verify --verbose build/LuckyPull-Android.apk
 
-      - name: Package patched Godot source
+      - name: Package clean Godot source
         shell: bash
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}/.build-source"
-          zip -qr "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.0-Source.zip" LuckyPull_Godot4
-          test -s "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.0-Source.zip"
+          zip -qr "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.1-Source.zip" LuckyPull_Godot4 -x "LuckyPull_Godot4/.godot/*" "LuckyPull_Godot4/build/*.apk" "LuckyPull_Godot4/build/*.idsig"
+          test -s "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.1-Source.zip"
+          unzip -t "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.1-Source.zip" >/dev/null
 
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.4.0-Android-Debug-APK
+          name: LuckyPull-v0.4.1-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
           if-no-files-found: error
           retention-days: 14
@@ -179,7 +154,7 @@ jobs:
       - name: Upload patched Godot source
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-Godot4-v0.4.0-Source
-          path: LuckyPull-Godot4-v0.4.0-Source.zip
+          name: LuckyPull-Godot4-v0.4.1-Source
+          path: LuckyPull-Godot4-v0.4.1-Source.zip
           if-no-files-found: error
           retention-days: 14
