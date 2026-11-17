@@ -6,13 +6,13 @@
 
 - كل دفع إلى فرع `main` يشغّل GitHub Actions.
 - يمكن تشغيل البناء يدوياً من تبويب **Actions** عبر **Build Lucky Pull Android APK**.
-- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.3.4-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
+- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.4.2-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
 
 الـAPK الناتج نسخة Debug للاختبار والتثبيت، ويوقّع بمفتاح مؤقت ينشأ داخل عملية البناء. لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف، وليس إصدار Release للنشر العام.
 
 ## بنية الملفات
 
-- `project-payload/LuckyPull_Godot4_v0.3.4.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
+- `project-payload/LuckyPull_Godot4_v0.4.2.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
 - `.github/workflows/android-apk.yml`: مسار البناء والتحقق ورفع APK كـArtifact.
 
 ## مواصفات بناء Android
@@ -55,3 +55,12 @@
 - Parses malformed save files without emitting an expected JSON parser error during backup recovery.
 - Cleans up temporary state objects in the automated tests.
 - Android version code is now 4.
+
+
+## Version 0.4.2 — 14-Day Free Season
+
+- Adds a recurring 14-day free season with 14 reward tiers and 1,400 season points.
+- Season points are earned from successful pulls, chest openings, daily login gifts, and claimed daily missions.
+- Rewards are claim-once, locally saved, and reset safely when the 14-day period expires.
+- Adds an Arabic RTL / English LTR Season tab. The season has no paid pass, gambling, or cash prizes.
+- Save schema migrates from v3 to v4 without discarding existing progress.
