@@ -64,15 +64,16 @@ jobs:
           set -euo pipefail
           PROJECT_DIR="${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4"
           PATCH_FILE="${RUNNER_TEMP}/luckypull-v0.4.0.patch"
+          export PATCH_FILE
           python3 - <<'PY'
           import base64
           import lzma
+          import os
           source = "project-payload/LuckyPull-v0.4.0.patch.xz.b64"
-          target = "${RUNNER_TEMP}/luckypull-v0.4.0.patch"
           with open(source, "rt", encoding="ascii") as handle:
               compressed = base64.b64decode(handle.read())
           patch_data = lzma.decompress(compressed)
-          with open(target, "wb") as handle:
+          with open(os.environ["PATCH_FILE"], "wb") as handle:
               handle.write(patch_data)
           PY
           cd "${PROJECT_DIR}"
