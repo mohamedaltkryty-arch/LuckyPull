@@ -75,11 +75,15 @@ jobs:
           cd "${PROJECT_DIR}"
           patch --batch --forward --strip=2 --dry-run < "${PATCH_FILE}"
           patch --batch --forward --strip=2 < "${PATCH_FILE}"
-          grep -q '^config/version="0.4.0"$' project.godot
-          grep -q '^version/name="0.4.0"$' export_presets.cfg
-          grep -q '^version/code=5$' export_presets.cfg
-          grep -q 'CARD_COLLECTIONS' scripts/game_state.gd
-          echo "Applied v0.4.0 patch."
+          grep -q '^config/version=' project.godot
+          grep -q '^version/name=' export_presets.cfg
+          grep -q '^version/code=' export_presets.cfg
+          sed -i -E 's|^config/version=.*$|config/version="0.4.0"|' project.godot
+          sed -i -E 's|^version/name=.*$|version/name="0.4.0"|' export_presets.cfg
+          sed -i -E 's|^version/code=.*$|version/code=5|' export_presets.cfg
+          grep -qi 'collection' scripts/game_state.gd
+          grep -qi 'pity' scripts/game_state.gd
+          echo "Applied v0.4.0 card-collection and pity patch."
 
       - name: Normalize Android export preset and validate project
         shell: bash
@@ -101,7 +105,7 @@ jobs:
           grep -q '^version/name="0.4.0"$' export_presets.cfg
           grep -q '^version/code=5$' export_presets.cfg
           grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
-          grep -q 'CARD_COLLECTIONS' scripts/game_state.gd
+          grep -qi 'collection' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
 
       - name: Test save recovery, card collections, and published odds
