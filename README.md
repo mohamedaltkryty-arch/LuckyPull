@@ -64,3 +64,12 @@
 - Rewards are claim-once, locally saved, and reset safely when the 14-day period expires.
 - Adds an Arabic RTL / English LTR Season tab. The season has no paid pass, gambling, or cash prizes.
 - Save schema migrates from v3 to v4 without discarding existing progress.
+
+
+## Version 0.4.3 — Season Cadence Recovery
+
+- Season rollover now catches up across all fully elapsed 14-day periods.
+- The season schedule remains anchored to its original start timestamp, preventing drift when the game is not opened on expiry.
+- Expired season points and unclaimed tier rewards are discarded; no rewards are granted for missed seasons.
+- Automated tests cover three missed seasons, remaining duration, and the next scheduled rollover.
+- Android version name/code updated to 0.4.3 / 8.
