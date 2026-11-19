@@ -6,13 +6,13 @@
 
 - كل دفع إلى فرع `main` يشغّل GitHub Actions.
 - يمكن تشغيل البناء يدوياً من تبويب **Actions** عبر **Build Lucky Pull Android APK**.
-- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.4.2-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
+- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.4.4-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
 
 الـAPK الناتج نسخة Debug للاختبار والتثبيت، ويوقّع بمفتاح مؤقت ينشأ داخل عملية البناء. لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف، وليس إصدار Release للنشر العام.
 
 ## بنية الملفات
 
-- `project-payload/LuckyPull_Godot4_v0.4.2.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
+- `project-payload/LuckyPull_Godot4_v0.4.4.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
 - `.github/workflows/android-apk.yml`: مسار البناء والتحقق ورفع APK كـArtifact.
 
 ## مواصفات بناء Android
@@ -73,3 +73,16 @@
 - Expired season points and unclaimed tier rewards are discarded; no rewards are granted for missed seasons.
 - Automated tests cover three missed seasons, remaining duration, and the next scheduled rollover.
 - Android version name/code updated to 0.4.3 / 8.
+
+
+## Version 0.4.4 — Legendary & Season Chests
+
+- Adds four chest types: Standard, Golden, Legendary, and Season.
+- Legendary Chest costs 12 in-game gems; insufficient balances are rejected before inventory changes.
+- Completing all 14 free season tiers grants one claim-once Season Chest.
+- Standard/Golden, Legendary, and Season chests each show their own published odds in the chest screen.
+- Legendary chest odds: 5% small coins, 10% medium coins, 20% common card, 35% rare card, 20% gems, 10% legendary card.
+- Season chest odds: 20% small coins, 20% medium coins, 25% common card, 20% rare card, 12% gems, 3% legendary card.
+- All chest odds total 100%; chest openings never advance or reset the regular-pull pity counter.
+- Season Chest inventory and claim state are saved locally. Save schema migrates from v4 to v5.
+- No real-money gambling or cash prizes are included.
