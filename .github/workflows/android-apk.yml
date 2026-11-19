@@ -50,7 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           base64 --decode project-payload/LuckyPull_Godot4_v0.4.4.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "629c55dc2c30ad015b715c0e1986a1a4998d4eca90cf4072a0ae3ecdb792d321  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
+          echo "f80f6bd32348615974311ff8584f882485876e473e417f97aba03e55f9dce4a0  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
           tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
           tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
