@@ -96,7 +96,7 @@ jobs:
           cd "${PROJECT_DIR}"
           godot --headless --path . --script res://tests/save_recovery_test.gd
 
-          grep -q 'v4-to-v5 migration, independent chest odds, legendary chest gem spending, season bonus chest claims and persistence' tests/save_recovery_test.gd
+          grep -q 'v4-to-v5 migration, pull pity, independent chest odds, legendary chest gem spending, season bonus chest claims and persistence' tests/save_recovery_test.gd
 
       - name: Launch game scene headlessly
         shell: bash
