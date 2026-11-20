@@ -199,6 +199,7 @@ jobs:
           xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v080.patch.xz" > "${RUNNER_TEMP}/luckypull-v080.patch"
           cd "${PROJECT_DIR}"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v080.patch"
+          patch --batch --forward -p1 < "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-translation-fix.patch"
           cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-01" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-02" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-03" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-04" > "${RUNNER_TEMP}/luckypull-icon.b64"
           base64 --decode "${RUNNER_TEMP}/luckypull-icon.b64" > "${RUNNER_TEMP}/luckypull-icon.png"
           echo "89333f6e53f4f1dc7b90fbc1b4cde79024dd32c2bad1e0b32e80d48bf6eb5bd4  ${RUNNER_TEMP}/luckypull-icon.png" | sha256sum --check -
@@ -254,9 +255,9 @@ jobs:
           cd "${PROJECT_DIR}"
           mkdir -p build
           godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android-v0.8.0.apk"
-          test -s build/LuckyPull-Android-v0.6.0.apk
-          unzip -t build/LuckyPull-Android-v0.6.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/LuckyPull-Android-v0.6.0.apk | awk '{print $1}')"
+          test -s build/LuckyPull-Android-v0.8.0.apk
+          unzip -t build/LuckyPull-Android-v0.8.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/LuckyPull-Android-v0.8.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -266,13 +267,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android-v0.6.0.apk
+          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android-v0.8.0.apk
           printf '### Lucky Pull 0.8.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
           name: LuckyPull-v0.8.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android-v0.6.0.apk
+          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android-v0.8.0.apk
           if-no-files-found: error
           retention-days: 30
