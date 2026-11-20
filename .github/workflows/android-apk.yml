@@ -102,14 +102,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-0{1..7} > "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64"
+          cat project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-01 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02a project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02b project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-03 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-04 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-05 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-06 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-07 > "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64"
           base64 --decode "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64" > "${RUNNER_TEMP}/luckypull-v080.patch.xz"
           echo "bea1e539b9b5fdd4beff89bb41bb68b097f1f5d20ac5a5569afeac6c99f90a3f  ${RUNNER_TEMP}/luckypull-v080.patch.xz" | sha256sum --check -
           xz --test "${RUNNER_TEMP}/luckypull-v080.patch.xz"
           xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v080.patch.xz" > "${RUNNER_TEMP}/luckypull-v080.patch"
           cd "${PROJECT_DIR}"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v080.patch"
-          cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-0"{1..4} > "${RUNNER_TEMP}/luckypull-icon.b64"
+          cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-01" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-02" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-03" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-04" > "${RUNNER_TEMP}/luckypull-icon.b64"
           base64 --decode "${RUNNER_TEMP}/luckypull-icon.b64" > "${RUNNER_TEMP}/luckypull-icon.png"
           echo "89333f6e53f4f1dc7b90fbc1b4cde79024dd32c2bad1e0b32e80d48bf6eb5bd4  ${RUNNER_TEMP}/luckypull-icon.png" | sha256sum --check -
           install -m 0644 "${RUNNER_TEMP}/luckypull-icon.png" "${PROJECT_DIR}/assets/app_icon.png"
