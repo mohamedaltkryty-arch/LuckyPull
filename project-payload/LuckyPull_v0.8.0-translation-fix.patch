@@ -1,0 +1,17 @@
+--- a/scripts/main.gd
++++ b/scripts/main.gd
+@@ -189,13 +189,11 @@
+     "استعد المانا (+32)": "Recover Mana (+32)", "الانتصارات": "Victories", "أفضل مرحلة": "Best Wave",
+     "ابدأ المواجهة": "Start Battle", "ابدأ المواجهة أولاً": "Start a battle first", "ابدأ الدفاع أولاً": "Begin defense first.", "المواجهة مستمرة بالفعل": "The encounter is already active.", "المانا غير كافية لهذه التعويذة": "Not enough mana for this spell",
+     "المانا مكتملة بالفعل": "Mana is already full", "تعويذة غير معروفة": "Unknown spell", "ترقية غير معروفة": "Unknown upgrade",
+-    "وصلت الترقية إلى الحد الأقصى": "Upgrade reached its maximum level", "العملات غير كافية": "Not enough coins", "العملات غير كافية": "Not enough coins",
++    "وصلت الترقية إلى الحد الأقصى": "Upgrade reached its maximum level",
+     "تم تطوير الحصن": "Fortress upgraded", "نواة الحصن سليمة بالفعل": "The fortress core is already healthy",
+     "تم إصلاح نواة الحصن؛ ابدأ الدفاع من الموجة الحالية": "Fortress core repaired. Begin defense from the current wave.",
+     "أصلح نواة الحصن قبل بدء الدفاع": "Repair the fortress core before beginning defense.",
+     "بدأ دفاع الحصن؛ اهزم العدو قبل اختراق النواة": "Fortress defense started. Defeat the enemy before it breaches the core.",
+-    "المواجهة مستمرة بالفعل": "The encounter is already active.", "ابدأ الدفاع أولاً": "Begin defense first.",
+-    "كل المظاهر التي تشتريها تبقى ملكك ويمكنك تبديلها في أي وقت.": "Every purchased appearance remains yours and can be changed at any time."
+ 
+ }
+ 
