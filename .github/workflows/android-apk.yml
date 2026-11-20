@@ -88,6 +88,16 @@ jobs:
           grep -q '^version/code=12$' export_presets.cfg
           grep -q '^const SAVE_VERSION := 8$' scripts/game_state.gd
 
+      - name: Apply Godot runtime fixes discovered by CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 --decode project-payload/LuckyPull_v0.6.0_runtime_fixes.patch.xz.b64 > "${RUNNER_TEMP}/luckypull-runtime-fixes.patch.xz"
+          xz --test "${RUNNER_TEMP}/luckypull-runtime-fixes.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/luckypull-runtime-fixes.patch.xz" > "${RUNNER_TEMP}/luckypull-runtime-fixes.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p2 < "${RUNNER_TEMP}/luckypull-runtime-fixes.patch"
+
       - name: Generate original offline sound effects
         shell: bash
         run: |
