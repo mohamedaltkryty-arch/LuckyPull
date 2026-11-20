@@ -313,9 +313,9 @@ jobs:
           cd "${PROJECT_DIR}"
           mkdir -p build
           godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.0.apk"
-          test -s build/LuckyPull-Android-v0.8.0.apk
-          unzip -t build/LuckyPull-Android-v0.8.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/LuckyPull-Android-v0.8.0.apk | awk '{print $1}')"
+          test -s build/NEXORA-Android-v0.9.0.apk
+          unzip -t build/NEXORA-Android-v0.9.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -325,13 +325,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android-v0.8.0.apk
+          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.0.apk
           printf '### NEXORA 0.9.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
           name: NEXORA-v0.9.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android-v0.8.0.apk
+          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.0.apk
           if-no-files-found: error
           retention-days: 30
