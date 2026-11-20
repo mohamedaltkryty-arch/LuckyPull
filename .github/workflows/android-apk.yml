@@ -178,6 +178,16 @@ jobs:
           grep -q 'vibration_enabled' scripts/main.gd
           ! grep -q 'ad_1' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("tests/save_recovery_test.gd")
+          source = path.read_text(encoding="utf-8")
+          duplicate_free_block = "    shop_reload.free()\n    collection_state.free()\n    migration_v7_state.free()\n    arcade_state.free()"
+          if duplicate_free_block not in source:
+              raise SystemExit("Duplicate-free cleanup block not found")
+          source = source.replace(duplicate_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
+          path.write_text(source, encoding="utf-8")
+          PY
 
       - name: Run automated game and save tests
         shell: bash
@@ -185,6 +195,15 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           godot --headless --path . --script res://tests/save_recovery_test.gd
+
+      - name: Upload reconstructed source for test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuckyPull-v0.6.0-Reconstructed-Source
+          path: .build-source/LuckyPull_Godot4
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Launch main game scene
         shell: bash
