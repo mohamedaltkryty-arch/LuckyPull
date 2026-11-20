@@ -155,6 +155,7 @@ jobs:
           sed -i -E 's|^gradle_build/target_sdk=.*$|gradle_build/target_sdk=""|' export_presets.cfg
           grep -q '^textures/vram_compression/import_etc2_astc=' project.godot || sed -i '/^\[rendering\]/a textures/vram_compression/import_etc2_astc=true' project.godot
           sed -i 's/five active offline daily missions/six active offline daily missions/' tests/save_recovery_test.gd
+          sed -i 's/"spell_daily_casts", 0)) != 3/"spell_daily_casts", 0)) != 4/' tests/save_recovery_test.gd
           rm -rf .godot/imported
           godot --headless --editor --path . --quit
           test -s assets/fonts/NotoSansArabic-Regular.ttf
