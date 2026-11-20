@@ -1,88 +1,39 @@
 # Lucky Pull — اسحب وفز
 
-مشروع لعبة عربية RTL مبني باستخدام Godot 4.3، ومهيأ لهواتف Android.
+لعبة Android عربية أصلية، مبنية على Godot 4.3، تعمل دون اتصال وتخزن تقدم اللاعب محلياً.
 
-## بناء APK تلقائياً
+## الإصدار الحالي: 0.6.0
 
-- كل دفع إلى فرع `main` يشغّل GitHub Actions.
-- يمكن تشغيل البناء يدوياً من تبويب **Actions** عبر **Build Lucky Pull Android APK**.
-- عند نجاح البناء يظهر artifact باسم `LuckyPull-v0.4.4-Android-Debug-APK` ويحتوي على `LuckyPull-Android.apk`.
+- Android APK Debug لأجهزة ARMv7 وARM64.
+- العربية RTL افتراضياً والإنجليزية LTR.
+- اللعبة فردية ولا تتطلب حساباً أو إنترنتاً أو خادماً.
+- لا مقامرة، ولا رهانات، ولا جوائز نقدية، ولا مشتريات بأموال حقيقية.
 
-الـAPK الناتج نسخة Debug للاختبار والتثبيت، ويوقّع بمفتاح مؤقت ينشأ داخل عملية البناء. لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف، وليس إصدار Release للنشر العام.
+## محتوى اللعبة
 
-## بنية الملفات
+- سحب باحتمالات معلنة مجموعها 100% وضمانة بطاقة نادرة تصل إلى 100% في المحاولة الستين.
+- طاقة تتجدد، بطاقات ومجموعات، أربعة أنواع من الصناديق، موسم مجاني من 14 يوماً، ومتجر مظاهر.
+- ست مهام يومية تعمل دون إعلانات أو مزود خارجي.
+- Elemental Spell Chain: قتال سحري بسلاسل عناصر وتعويذات.
+- Tower Bastion: دفاع موجات وترقيات برج وإدارة موارد.
+- Cat Squadron: قتال تلقائي ومكافآت خمول حتى 8 ساعات ودمج أسلحة.
+- مؤثرات صوتية أصلية وإعدادات صوت واهتزاز محفوظة.
 
-- `project-payload/LuckyPull_Godot4_v0.4.4.tar.gz.b64`: أجزاء أرشيف المشروع المصدر المضغوط.
-- `.github/workflows/android-apk.yml`: مسار البناء والتحقق ورفع APK كـArtifact.
+## الخصوصية والحفظ
 
-## مواصفات بناء Android
+لا توجد صلاحية إنترنت في إصدار Android. بيانات التقدم والإعدادات تحفظ محلياً في مساحة التطبيق. يدعم الحفظ نسخة احتياطية وترقية المخطط مع رفض استبدال بيانات أنشأتها نسخة أحدث.
 
-- Godot 4.3 القياسي مع قوالب التصدير المطابقة.
-- اتجاه عمودي وتصميم عربي RTL.
-- ARMv7 وARM64.
-- لا يطلب التطبيق إذن الإنترنت.
-- لا يتضمن مقامرة أو جوائز نقدية.
+## بناء APK عبر GitHub Actions
 
-يتم فك الأرشيف داخل عامل GitHub Actions، واستيراد المشروع، ثم تصدير APK والتحقق من سلامة ملفه وتوقيعه قبل رفعه.
+1. افتح تبويب Actions.
+2. شغّل Build Lucky Pull Android APK يدوياً، أو ادفع تغييراً إلى main.
+3. انتظر اكتمال استيراد المشروع واختبارات Godot وتشغيل المشهد وتصدير Android والتحقق من توقيع APK.
+4. نزّل artifact باسم LuckyPull-v0.6.0-Android-Debug-APK.
 
+يُبنى APK من أساس v0.4.4 مع تطبيق تحديث مصدر مضغوط مقسّم إلى أجزاء داخل project-payload. ينشئ مسار CI المؤثرات الصوتية الحتمية قبل استيراد موارد Godot.
 
-## Version 0.3.0 — Neon Cosmos
+## حدود الإصدار
 
-- New colorful cosmic visual identity and reworked Arabic RTL mobile screens.
-- New Lucky Pull app icon and Android launcher icon.
-- New animated pull interaction, custom reward dialog, refreshed cards, missions and chest screens.
-
-
-## Version 0.3.2 — Typography Refresh
-
-- Complete text hierarchy refresh across all game screens.
-- Embedded Arabic Regular, SemiBold, and Bold font weights.
-- Larger small text, clearer button labels, and consistent line spacing.
-
-
-## Version 0.3.3 — Save Recovery Protection
-
-- Prevents an older build from overwriting a save created by a newer build.
-- Recovers a corrupt primary save from a valid backup without replacing a future-version primary.
-- Verifies temporary writes and backup rotation before promoting a new save.
-- Shows an Arabic/English recovery warning and disables daily claims while recovery is read-only.
-- Adds automated Godot smoke tests for save recovery, legacy migration, and probability totals.
-- Synchronizes Android version metadata to 0.3.3 (version code 3).
-
-
-## Version 0.3.4 — Save Parser & Test Cleanup
-
-- Parses malformed save files without emitting an expected JSON parser error during backup recovery.
-- Cleans up temporary state objects in the automated tests.
-- Android version code is now 4.
-
-
-## Version 0.4.2 — 14-Day Free Season
-
-- Adds a recurring 14-day free season with 14 reward tiers and 1,400 season points.
-- Season points are earned from successful pulls, chest openings, daily login gifts, and claimed daily missions.
-- Rewards are claim-once, locally saved, and reset safely when the 14-day period expires.
-- Adds an Arabic RTL / English LTR Season tab. The season has no paid pass, gambling, or cash prizes.
-- Save schema migrates from v3 to v4 without discarding existing progress.
-
-
-## Version 0.4.3 — Season Cadence Recovery
-
-- Season rollover now catches up across all fully elapsed 14-day periods.
-- The season schedule remains anchored to its original start timestamp, preventing drift when the game is not opened on expiry.
-- Expired season points and unclaimed tier rewards are discarded; no rewards are granted for missed seasons.
-- Automated tests cover three missed seasons, remaining duration, and the next scheduled rollover.
-- Android version name/code updated to 0.4.3 / 8.
-
-
-## Version 0.4.4 — Legendary & Season Chests
-
-- Adds four chest types: Standard, Golden, Legendary, and Season.
-- Legendary Chest costs 12 in-game gems; insufficient balances are rejected before inventory changes.
-- Completing all 14 free season tiers grants one claim-once Season Chest.
-- Standard/Golden, Legendary, and Season chests each show their own published odds in the chest screen.
-- Legendary chest odds: 5% small coins, 10% medium coins, 20% common card, 35% rare card, 20% gems, 10% legendary card.
-- Season chest odds: 20% small coins, 20% medium coins, 25% common card, 20% rare card, 12% gems, 3% legendary card.
-- All chest odds total 100%; chest openings never advance or reset the regular-pull pity counter.
-- Season Chest inventory and claim state are saved locally. Save schema migrates from v4 to v5.
-- No real-money gambling or cash prizes are included.
+- Artifact الحالي هو APK Debug بمفتاح مؤقت؛ لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف.
+- لا يُعد توقيع Release دائم أو اختباراً على هاتف فعلي منجزاً إلا بعد تنفيذهما فعلياً.
+- لا يوجد مزود إعلانات أو حسابات أو مزامنة سحابية.
