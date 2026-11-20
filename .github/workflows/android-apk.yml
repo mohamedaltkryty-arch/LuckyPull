@@ -178,6 +178,25 @@ jobs:
           grep -q 'vibration_enabled' scripts/main.gd
           ! grep -q 'ad_1' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("tests/save_recovery_test.gd")
+          source = path.read_text(encoding="utf-8")
+          replacements = [
+              ("    var arcade_state = state_script.new()", "    print(\"TRACE_ARCADE_01: before state instance\")\n    var arcade_state = state_script.new()"),
+              ("    arcade_state.load_game()\n    var arcade_migrated", "    arcade_state.load_game()\n    print(\"TRACE_ARCADE_02: after load_game\")\n    var arcade_migrated"),
+              ("    arcade_state.arcade = arcade_state._normalize_arcade_data({})", "    arcade_state.arcade = arcade_state._normalize_arcade_data({})\n    print(\"TRACE_ARCADE_03: after normalize\")"),
+              ("    var spell_start: Dictionary = arcade_state.start_spell_run()", "    print(\"TRACE_ARCADE_04: before spell start\")\n    var spell_start: Dictionary = arcade_state.start_spell_run()\n    print(\"TRACE_ARCADE_05: after spell start\")"),
+              ("    var spell_win: Dictionary = arcade_state.cast_spell(\"fire\")", "    print(\"TRACE_ARCADE_06: before winning cast\")\n    var spell_win: Dictionary = arcade_state.cast_spell(\"fire\")\n    print(\"TRACE_ARCADE_07: after winning cast\")"),
+              ("    var spell_mana_start: Dictionary = arcade_state.start_spell_run()", "    print(\"TRACE_ARCADE_08: before retry\")\n    var spell_mana_start: Dictionary = arcade_state.start_spell_run()\n    print(\"TRACE_ARCADE_09: after retry\")"),
+              ("        var cast_result: Dictionary = arcade_state.cast_spell(spell_element)", "        print(\"TRACE_ARCADE_10: before cast \" + spell_element)\n        var cast_result: Dictionary = arcade_state.cast_spell(spell_element)\n        print(\"TRACE_ARCADE_11: after cast \" + spell_element)")
+          ]
+          for old, new in replacements:
+              if old not in source:
+                  raise SystemExit("Missing instrumentation anchor: " + old.splitlines()[0])
+              source = source.replace(old, new, 1)
+          path.write_text(source, encoding="utf-8")
+          PY
 
       - name: Run automated game and save tests
         shell: bash
