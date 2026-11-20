@@ -98,26 +98,6 @@ jobs:
           cd "${PROJECT_DIR}"
           patch --batch --forward -p2 < "${RUNNER_TEMP}/luckypull-runtime-fixes.patch"
 
-      - name: Apply v0.8.0 redesign and campaign fixes
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-01 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02a project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02b project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-03 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-04 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-05 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-06 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-07 > "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64"
-          base64 --decode "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64" > "${RUNNER_TEMP}/luckypull-v080.patch.xz"
-          echo "bea1e539b9b5fdd4beff89bb41bb68b097f1f5d20ac5a5569afeac6c99f90a3f  ${RUNNER_TEMP}/luckypull-v080.patch.xz" | sha256sum --check -
-          xz --test "${RUNNER_TEMP}/luckypull-v080.patch.xz"
-          xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v080.patch.xz" > "${RUNNER_TEMP}/luckypull-v080.patch"
-          cd "${PROJECT_DIR}"
-          patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v080.patch"
-          cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-01" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-02" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-03" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-04" > "${RUNNER_TEMP}/luckypull-icon.b64"
-          base64 --decode "${RUNNER_TEMP}/luckypull-icon.b64" > "${RUNNER_TEMP}/luckypull-icon.png"
-          echo "89333f6e53f4f1dc7b90fbc1b4cde79024dd32c2bad1e0b32e80d48bf6eb5bd4  ${RUNNER_TEMP}/luckypull-icon.png" | sha256sum --check -
-          install -m 0644 "${RUNNER_TEMP}/luckypull-icon.png" "${PROJECT_DIR}/assets/app_icon.png"
-          grep -qx 'config/version="0.8.0"' project.godot
-          grep -qx 'version/name="0.8.0"' export_presets.cfg
-          grep -qx 'version/code=15' export_presets.cfg
-          grep -qx 'permissions/internet=false' export_presets.cfg
-
       - name: Generate original offline sound effects
         shell: bash
         run: |
@@ -191,9 +171,9 @@ jobs:
           grep -q 'spell_daily_casts' scripts/game_state.gd
           grep -q 'func purchase_cosmetic' scripts/game_state.gd
           grep -q 'func save_game' scripts/game_state.gd
-          grep -q 'حصن التعويذات' scripts/main.gd
-          grep -q 'Campaign' scripts/main.gd
-          ! grep -q 'Cat Squadron' scripts/main.gd
+          grep -q 'Spell Chain' scripts/main.gd
+          grep -q 'Tower Bastion' scripts/main.gd
+          grep -q 'Cat Squadron' scripts/main.gd
           grep -q 'SFX_TAP' scripts/main.gd
           grep -q 'vibration_enabled' scripts/main.gd
           ! grep -q 'ad_1' scripts/game_state.gd
@@ -207,6 +187,26 @@ jobs:
               source = source.replace(duplicate_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
               path.write_text(source, encoding="utf-8")
           PY
+
+      - name: Apply v0.8.0 redesign and campaign fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-01 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02a project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02b project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-03 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-04 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-05 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-06 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-07 > "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64"
+          base64 --decode "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64" > "${RUNNER_TEMP}/luckypull-v080.patch.xz"
+          echo "bea1e539b9b5fdd4beff89bb41bb68b097f1f5d20ac5a5569afeac6c99f90a3f  ${RUNNER_TEMP}/luckypull-v080.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/luckypull-v080.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v080.patch.xz" > "${RUNNER_TEMP}/luckypull-v080.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v080.patch"
+          cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-01" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-02" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-03" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-04" > "${RUNNER_TEMP}/luckypull-icon.b64"
+          base64 --decode "${RUNNER_TEMP}/luckypull-icon.b64" > "${RUNNER_TEMP}/luckypull-icon.png"
+          echo "89333f6e53f4f1dc7b90fbc1b4cde79024dd32c2bad1e0b32e80d48bf6eb5bd4  ${RUNNER_TEMP}/luckypull-icon.png" | sha256sum --check -
+          install -m 0644 "${RUNNER_TEMP}/luckypull-icon.png" "${PROJECT_DIR}/assets/app_icon.png"
+          grep -qx 'config/version="0.8.0"' project.godot
+          grep -qx 'version/name="0.8.0"' export_presets.cfg
+          grep -qx 'version/code=15' export_presets.cfg
+          grep -qx 'permissions/internet=false' export_presets.cfg
 
       - name: Run automated game and save tests
         shell: bash
