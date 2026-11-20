@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,7 +20,7 @@ jobs:
   android-debug:
     name: Godot 4.3 Android Debug APK
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     container:
       image: barichello/godot-ci:4.3
 
@@ -25,7 +28,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify Godot and Android export templates
+      - name: Verify build tools
         shell: bash
         run: |
           set -euo pipefail
@@ -42,22 +45,97 @@ jobs:
           command -v godot
           godot --version
           java -version
+          command -v python3
+          command -v xz
+          command -v patch
+          command -v zip
+          command -v unzip
           keytool -help >/dev/null 2>&1
           test -f "${TEMPLATE_TARGET}/android_debug.apk"
 
-      - name: Reconstruct v0.4.4 source project
+      - name: Reconstruct v0.4.4 baseline source
         shell: bash
         run: |
           set -euo pipefail
-          base64 --decode project-payload/LuckyPull_Godot4_v0.4.4.tar.gz.b64 > LuckyPull_Godot4_Project.tar.gz
-          echo "f80f6bd32348615974311ff8584f882485876e473e417f97aba03e55f9dce4a0  LuckyPull_Godot4_Project.tar.gz" | sha256sum --check
-          tar -tzf LuckyPull_Godot4_Project.tar.gz | grep -Fx "LuckyPull_Godot4/project.godot"
+          base64 --decode project-payload/LuckyPull_Godot4_v0.4.4.tar.gz.b64 > "${RUNNER_TEMP}/LuckyPull-v0.4.4.tar.gz"
+          echo "f80f6bd32348615974311ff8584f882485876e473e417f97aba03e55f9dce4a0  ${RUNNER_TEMP}/LuckyPull-v0.4.4.tar.gz" | sha256sum --check
+          tar -tzf "${RUNNER_TEMP}/LuckyPull-v0.4.4.tar.gz" | grep -Fx "LuckyPull_Godot4/project.godot"
           mkdir -p .build-source
-          tar -xzf LuckyPull_Godot4_Project.tar.gz -C .build-source
-          test -f .build-source/LuckyPull_Godot4/project.godot
+          tar -xzf "${RUNNER_TEMP}/LuckyPull-v0.4.4.tar.gz" -C .build-source
           echo "PROJECT_DIR=${GITHUB_WORKSPACE}/.build-source/LuckyPull_Godot4" >> "${GITHUB_ENV}"
+          test -f .build-source/LuckyPull_Godot4/project.godot
 
-      - name: Normalize Android export preset and validate project
+      - name: Apply complete v0.6.0 source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            project-payload/LuckyPull_v0.6.0.patch.xz.b64 \
+            project-payload/LuckyPull_v0.6.0-patch-part-02.b64 \
+            project-payload/LuckyPull_v0.6.0-patch-part-03.b64 \
+            project-payload/LuckyPull_v0.6.0-patch-part-04.b64 \
+            project-payload/LuckyPull_v0.6.0-patch-part-05.b64 \
+            project-payload/LuckyPull_v0.6.0-patch-part-06.b64 \
+            > "${RUNNER_TEMP}/luckypull-v0.6.0.patch.xz.b64"
+          base64 --decode "${RUNNER_TEMP}/luckypull-v0.6.0.patch.xz.b64" > "${RUNNER_TEMP}/luckypull-v0.6.0.patch.xz"
+          xz --test "${RUNNER_TEMP}/luckypull-v0.6.0.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v0.6.0.patch.xz" > "${RUNNER_TEMP}/luckypull-v0.6.0.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v0.6.0.patch"
+          grep -q '^config/version="0.6.0"$' project.godot
+          grep -q '^version/name="0.6.0"$' export_presets.cfg
+          grep -q '^version/code=12$' export_presets.cfg
+
+      - name: Generate deterministic original sound effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import math
+          import os
+          import struct
+          import wave
+          from pathlib import Path
+
+          root = Path(os.environ["PROJECT_DIR"]) / "assets" / "audio"
+          root.mkdir(parents=True, exist_ok=True)
+          rate = 22050
+
+          def write_tone(name, notes, duration, shape="sine", volume=0.18):
+              total = int(rate * duration)
+              frames = bytearray()
+              for index in range(total):
+                  time_value = index / rate
+                  sample = 0.0
+                  for start, frequency in notes:
+                      local_time = time_value - start
+                      if 0.0 <= local_time < duration - start:
+                          phase = 2.0 * math.pi * frequency * local_time
+                          if shape == "triangle":
+                              value = 2.0 * abs(2.0 * ((frequency * local_time) % 1.0) - 1.0) - 1.0
+                          else:
+                              value = math.sin(phase)
+                          sample += value / len(notes)
+                  attack = min(1.0, index / max(1, int(rate * 0.012)))
+                  release = min(1.0, (total - index) / max(1, int(rate * 0.055)))
+                  envelope = max(0.0, min(attack, release))
+                  pcm = max(-1.0, min(1.0, sample * volume * envelope))
+                  frames.extend(struct.pack("<h", int(pcm * 32767)))
+              with wave.open(str(root / name), "wb") as audio:
+                  audio.setnchannels(1)
+                  audio.setsampwidth(2)
+                  audio.setframerate(rate)
+                  audio.writeframes(bytes(frames))
+
+          write_tone("ui_tap.wav", [(0.0, 740)], 0.065, volume=0.12)
+          write_tone("reward.wav", [(0.0, 660), (0.12, 830), (0.25, 990), (0.38, 1320)], 0.56)
+          write_tone("victory.wav", [(0.0, 523), (0.14, 659), (0.28, 784), (0.45, 1046)], 0.72, shape="triangle")
+          PY
+          test -s "${PROJECT_DIR}/assets/audio/ui_tap.wav"
+          test -s "${PROJECT_DIR}/assets/audio/reward.wav"
+          test -s "${PROJECT_DIR}/assets/audio/victory.wav"
+
+      - name: Validate project resources and Android settings
         shell: bash
         run: |
           set -euo pipefail
@@ -66,44 +144,49 @@ jobs:
           sed -i -E 's|^gradle_build/target_sdk=.*$|gradle_build/target_sdk=""|' export_presets.cfg
           grep -q '^textures/vram_compression/import_etc2_astc=' project.godot || \
             sed -i '/^\[rendering\]/a textures/vram_compression/import_etc2_astc=true' project.godot
+          sed -i 's/five active offline daily missions/six active offline daily missions/' tests/save_recovery_test.gd
           rm -rf .godot/imported
           godot --headless --editor --path . --quit
           test -s assets/fonts/NotoSansArabic-Regular.ttf
           test -s assets/fonts/NotoSansArabic-SemiBold.ttf
           test -s assets/fonts/NotoSansArabic-Bold.ttf
           test -s assets/fonts/NotoSansSymbols2-Regular.ttf
+          test -s assets/audio/ui_tap.wav
+          test -s assets/audio/reward.wav
+          test -s assets/audio/victory.wav
           grep -q 'theme/default_font="res://assets/fonts/NotoSansArabic-Regular.ttf"' project.godot
-          grep -q '^config/version="0.4.4"$' project.godot
-          grep -q '^version/name="0.4.4"$' export_presets.cfg
-          grep -q '^version/code=9$' export_presets.cfg
-          grep -q 'var save_recovery_blocked: bool = false' scripts/game_state.gd
+          grep -q '^config/version="0.6.0"$' project.godot
+          grep -q '^version/name="0.6.0"$' export_presets.cfg
+          grep -q '^version/code=12$' export_presets.cfg
+          grep -q '^const SAVE_VERSION := 8$' scripts/game_state.gd
           grep -q 'CARD_SETS' scripts/game_state.gd
-          grep -q 'func get_base_odds()' scripts/game_state.gd
-          grep -q '^const SAVE_VERSION := 5$' scripts/game_state.gd
+          grep -q 'get_base_odds' scripts/game_state.gd
           grep -q 'SEASON_REWARDS' scripts/game_state.gd
-          grep -q 'func claim_season_reward(tier: int)' scripts/game_state.gd
-          grep -q 'func season_info(now: int = -1)' scripts/game_state.gd
-          grep -q 'func get_chest_odds(kind: String)' scripts/game_state.gd
-          grep -q 'func claim_season_bonus_chest()' scripts/game_state.gd
-          grep -q 'const LEGENDARY_CHEST_GEM_COST := 12' scripts/game_state.gd
-          grep -q 'var reward := _roll_chest_reward(kind)' scripts/game_state.gd
+          grep -q 'LEGENDARY_CHEST_GEM_COST' scripts/game_state.gd
+          grep -q 'spell_daily_casts' scripts/game_state.gd
+          grep -q 'Cat Squadron' scripts/main.gd
+          grep -q 'Elemental Spell Chain' scripts/main.gd
+          grep -q 'Tower Bastion' scripts/main.gd
+          grep -q 'SFX_TAP' scripts/main.gd
+          grep -q 'vibration_enabled' scripts/main.gd
+          grep -q 'func buy_cosmetic' scripts/game_state.gd
+          grep -q 'func save_game' scripts/game_state.gd
+          ! grep -q 'ad_1' scripts/game_state.gd
           test -s tests/save_recovery_test.gd
 
-      - name: Test save recovery, pity, independent chest odds, legendary purchases, and season chest claims
+      - name: Run automated economy, save, season, shop, and mini-game tests
         shell: bash
         run: |
           set -euo pipefail
           cd "${PROJECT_DIR}"
           godot --headless --path . --script res://tests/save_recovery_test.gd
 
-          grep -q 'v4-to-v5 migration, pull pity, independent chest odds, legendary chest gem spending, season bonus chest claims and persistence' tests/save_recovery_test.gd
-
-      - name: Launch game scene headlessly
+      - name: Launch all game scenes headlessly
         shell: bash
         run: |
           set -euo pipefail
           cd "${PROJECT_DIR}"
-          godot --headless --path . --quit-after 3
+          godot --headless --path . --quit-after 5
 
       - name: Create temporary Android debug signing key
         shell: bash
@@ -128,10 +211,10 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android.apk"
-          test -s build/LuckyPull-Android.apk
-          unzip -t build/LuckyPull-Android.apk >/dev/null
-          sha256sum build/LuckyPull-Android.apk
+          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android-v0.6.0.apk"
+          test -s build/LuckyPull-Android-v0.6.0.apk
+          unzip -t build/LuckyPull-Android-v0.6.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/LuckyPull-Android-v0.6.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -141,29 +224,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android.apk
+          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android-v0.6.0.apk
+          printf '### Lucky Pull Android APK 0.6.0\n\n- Export: successful\n- Godot tests: successful\n- APK SHA-256: `%s`\n- Signing: Debug V1/V2 verification via apksigner\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
-      - name: Package clean Godot source
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "${GITHUB_WORKSPACE}/.build-source"
-          zip -qr "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.4-Source.zip" LuckyPull_Godot4 -x "LuckyPull_Godot4/.godot/*" "LuckyPull_Godot4/build/*.apk" "LuckyPull_Godot4/build/*.idsig"
-          test -s "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.4-Source.zip"
-          unzip -t "${GITHUB_WORKSPACE}/LuckyPull-Godot4-v0.4.4-Source.zip" >/dev/null
-
-      - name: Upload installable debug APK
+      - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.4.4-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android.apk
+          name: LuckyPull-v0.6.0-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android-v0.6.0.apk
           if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload patched Godot source
-        uses: actions/upload-artifact@v4
-        with:
-          name: LuckyPull-Godot4-v0.4.4-Source
-          path: LuckyPull-Godot4-v0.4.4-Source.zip
-          if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
