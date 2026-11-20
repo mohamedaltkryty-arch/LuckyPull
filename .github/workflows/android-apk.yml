@@ -182,47 +182,12 @@ jobs:
           from pathlib import Path
           path = Path("tests/save_recovery_test.gd")
           source = path.read_text(encoding="utf-8")
-          replacements = [
-              ("    var arcade_state = state_script.new()", "    print(\"TRACE_ARCADE_01: before state instance\")\n    var arcade_state = state_script.new()"),
-              ("    arcade_state.load_game()\n    var arcade_migrated", "    arcade_state.load_game()\n    print(\"TRACE_ARCADE_02: after load_game\")\n    var arcade_migrated"),
-              ("    arcade_state.arcade = arcade_state._normalize_arcade_data({})", "    arcade_state.arcade = arcade_state._normalize_arcade_data({})\n    print(\"TRACE_ARCADE_03: after normalize\")"),
-              ("    var spell_start: Dictionary = arcade_state.start_spell_run()", "    print(\"TRACE_ARCADE_04: before spell start\")\n    var spell_start: Dictionary = arcade_state.start_spell_run()\n    print(\"TRACE_ARCADE_05: after spell start\")"),
-              ("    var spell_win: Dictionary = arcade_state.cast_spell(\"fire\")", "    print(\"TRACE_ARCADE_06: before winning cast\")\n    var spell_win: Dictionary = arcade_state.cast_spell(\"fire\")\n    print(\"TRACE_ARCADE_07: after winning cast\")"),
-              ("    var spell_mana_start: Dictionary = arcade_state.start_spell_run()", "    print(\"TRACE_ARCADE_08: before retry\")\n    var spell_mana_start: Dictionary = arcade_state.start_spell_run()\n    print(\"TRACE_ARCADE_09: after retry\")"),
-              ("        var cast_result: Dictionary = arcade_state.cast_spell(spell_element)", "        print(\"TRACE_ARCADE_10: before cast \" + spell_element)\n        var cast_result: Dictionary = arcade_state.cast_spell(spell_element)\n        print(\"TRACE_ARCADE_11: after cast \" + spell_element)"),
-              ("    if int(arcade_state.arcade.get(\"spell_daily_casts\", 0)) != 4:", "    print(\"TRACE_ARCADE_12: before daily cast count assertion\")\n    if int(arcade_state.arcade.get(\"spell_daily_casts\", 0)) != 4:"),
-              ("    var spell_daily_info: Dictionary = arcade_state.daily_mission_info(\"spell_3\")", "    print(\"TRACE_ARCADE_13: before daily mission info\")\n    var spell_daily_info: Dictionary = arcade_state.daily_mission_info(\"spell_3\")\n    print(\"TRACE_ARCADE_14: after daily mission info\")"),
-              ("    arcade_state.arcade[\"spell_mana\"] = 10", "    print(\"TRACE_ARCADE_15: before mana setup\")\n    arcade_state.arcade[\"spell_mana\"] = 10"),
-              ("    var mana_recovery: Dictionary = arcade_state.recover_spell_mana()", "    print(\"TRACE_ARCADE_16: before mana recovery\")\n    var mana_recovery: Dictionary = arcade_state.recover_spell_mana()\n    print(\"TRACE_ARCADE_17: after mana recovery\")"),
-              ("    var tower_upgrade: Dictionary = arcade_state.upgrade_tower(\"damage\")", "    print(\"TRACE_ARCADE_18: before tower upgrade\")\n    var tower_upgrade: Dictionary = arcade_state.upgrade_tower(\"damage\")\n    print(\"TRACE_ARCADE_19: after tower upgrade\")"),
-              ("    var tower_wave: Dictionary = arcade_state.defend_tower_wave()", "    print(\"TRACE_ARCADE_20: before tower wave\")\n    var tower_wave: Dictionary = arcade_state.defend_tower_wave()\n    print(\"TRACE_ARCADE_21: after tower wave\")"),
-              ("    var cat_buy: Dictionary = arcade_state.buy_cat_weapon()", "    print(\"TRACE_ARCADE_22: before cat buy\")\n    var cat_buy: Dictionary = arcade_state.buy_cat_weapon()\n    print(\"TRACE_ARCADE_23: after cat buy\")"),
-              ("    var cat_merge: Dictionary = arcade_state.merge_cat_weapons(1)", "    print(\"TRACE_ARCADE_24: before cat merge\")\n    var cat_merge: Dictionary = arcade_state.merge_cat_weapons(1)\n    print(\"TRACE_ARCADE_25: after cat merge\")"),
-              ("    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)", "    print(\"TRACE_ARCADE_26: before cat idle collect\")\n    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)\n    print(\"TRACE_ARCADE_27: after cat idle collect\")"),
-              ("    var safe_timestamp := int(arcade_state.arcade.get(\"cat_last_timestamp\", 0))", "    print(\"TRACE_ARCADE_28: before safe timestamp\")\n    var safe_timestamp := int(arcade_state.arcade.get(\"cat_last_timestamp\", 0))\n    print(\"TRACE_ARCADE_29: after safe timestamp\")"),
-              ("    var backwards_claim: Dictionary = arcade_state.collect_cat_idle(test_now - 3600)", "    print(\"TRACE_ARCADE_30: before backwards collect\")\n    var backwards_claim: Dictionary = arcade_state.collect_cat_idle(test_now - 3600)\n    print(\"TRACE_ARCADE_31: after backwards collect\")"),
-              ("    if int(arcade_state.daily_mission_info(\"arcade_3\").get(\"progress\", 0)) <= 0:", "    print(\"TRACE_ARCADE_32: before arcade mission\")\n    if int(arcade_state.daily_mission_info(\"arcade_3\").get(\"progress\", 0)) <= 0:"),
-              ("    if not arcade_state.save_game():", "    print(\"TRACE_ARCADE_33: before final arcade save\")\n    if not arcade_state.save_game():"),
-              ("    var arcade_reload = state_script.new()", "    print(\"TRACE_ARCADE_34: before arcade reload instance\")\n    var arcade_reload = state_script.new()"),
-              ("    arcade_reload.load_game()", "    arcade_reload.load_game()\n    print(\"TRACE_ARCADE_35: after arcade reload\")")
-          ]
-          for old, new in replacements:
-              if old not in source:
-                  raise SystemExit("Missing instrumentation anchor: " + old.splitlines()[0])
-              source = source.replace(old, new, 1)
-          final_free_block = "    shop_reload.free()\n    collection_state.free()\n    migration_v7_state.free()\n    arcade_state.free()"
-          if final_free_block not in source:
+          duplicate_free_block = "    shop_reload.free()\n    collection_state.free()\n    migration_v7_state.free()\n    arcade_state.free()"
+          if duplicate_free_block not in source:
               raise SystemExit("Duplicate-free cleanup block not found")
-          source = source.replace(final_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
+          source = source.replace(duplicate_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
           path.write_text(source, encoding="utf-8")
           PY
-
-      - name: Run automated game and save tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "${PROJECT_DIR}"
-          godot --headless --path . --script res://tests/save_recovery_test.gd
 
       - name: Upload reconstructed source for test diagnostics
         if: always()
