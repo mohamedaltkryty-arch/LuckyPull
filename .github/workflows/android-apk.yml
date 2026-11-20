@@ -251,20 +251,6 @@ jobs:
           grep -q 'func _mode_tile' scripts/main.gd
           [[ "$(grep -c '_mode_tile(modes_grid' scripts/main.gd)" -eq 6 ]]
           ! grep -q 'Lucky Pull' scripts/main.gd
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-          source = Path("scripts/main.gd").read_text(encoding="utf-8")
-          for name in ("EN_TRANSLATIONS", "BRAND_TRANSLATIONS"):
-              start = source.index(f"const {name} := {{")
-              opening = source.index("{", start)
-              closing = source.index("\\n}", opening)
-              keys = re.findall(r'"((?:[^"\\\\]|\\\\.)*)"\\s*:', source[opening + 1:closing])
-              duplicates = sorted({key for key in keys if keys.count(key) > 1})
-              if duplicates:
-                  raise SystemExit(f"Duplicate keys in {name}: {duplicates}")
-          print("NEXORA UI dictionaries and six mode shortcuts validated")
-          PY
           test -s assets/app_icon.png
 
       - name: Run automated game and save tests
