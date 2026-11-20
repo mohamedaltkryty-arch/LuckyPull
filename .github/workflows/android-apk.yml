@@ -198,7 +198,13 @@ jobs:
               ("    var tower_wave: Dictionary = arcade_state.defend_tower_wave()", "    print(\"TRACE_ARCADE_20: before tower wave\")\n    var tower_wave: Dictionary = arcade_state.defend_tower_wave()\n    print(\"TRACE_ARCADE_21: after tower wave\")"),
               ("    var cat_buy: Dictionary = arcade_state.buy_cat_weapon()", "    print(\"TRACE_ARCADE_22: before cat buy\")\n    var cat_buy: Dictionary = arcade_state.buy_cat_weapon()\n    print(\"TRACE_ARCADE_23: after cat buy\")"),
               ("    var cat_merge: Dictionary = arcade_state.merge_cat_weapons(1)", "    print(\"TRACE_ARCADE_24: before cat merge\")\n    var cat_merge: Dictionary = arcade_state.merge_cat_weapons(1)\n    print(\"TRACE_ARCADE_25: after cat merge\")"),
-              ("    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)", "    print(\"TRACE_ARCADE_26: before cat idle collect\")\n    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)\n    print(\"TRACE_ARCADE_27: after cat idle collect\")")
+              ("    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)", "    print(\"TRACE_ARCADE_26: before cat idle collect\")\n    var idle_claim: Dictionary = arcade_state.collect_cat_idle(test_now)\n    print(\"TRACE_ARCADE_27: after cat idle collect\")"),
+              ("    var safe_timestamp := int(arcade_state.arcade.get(\"cat_last_timestamp\", 0))", "    print(\"TRACE_ARCADE_28: before safe timestamp\")\n    var safe_timestamp := int(arcade_state.arcade.get(\"cat_last_timestamp\", 0))\n    print(\"TRACE_ARCADE_29: after safe timestamp\")"),
+              ("    var backwards_claim: Dictionary = arcade_state.collect_cat_idle(test_now - 3600)", "    print(\"TRACE_ARCADE_30: before backwards collect\")\n    var backwards_claim: Dictionary = arcade_state.collect_cat_idle(test_now - 3600)\n    print(\"TRACE_ARCADE_31: after backwards collect\")"),
+              ("    if int(arcade_state.daily_mission_info(\"arcade_3\").get(\"progress\", 0)) <= 0:", "    print(\"TRACE_ARCADE_32: before arcade mission\")\n    if int(arcade_state.daily_mission_info(\"arcade_3\").get(\"progress\", 0)) <= 0:"),
+              ("    if not arcade_state.save_game():", "    print(\"TRACE_ARCADE_33: before final arcade save\")\n    if not arcade_state.save_game():"),
+              ("    var arcade_reload = state_script.new()", "    print(\"TRACE_ARCADE_34: before arcade reload instance\")\n    var arcade_reload = state_script.new()"),
+              ("    arcade_reload.load_game()", "    arcade_reload.load_game()\n    print(\"TRACE_ARCADE_35: after arcade reload\")")
           ]
           for old, new in replacements:
               if old not in source:
