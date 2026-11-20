@@ -1,4 +1,4 @@
-name: Build Lucky Pull Android APK
+name: Build NEXORA Android APK
 
 on:
   push:
@@ -11,12 +11,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: luckypull-android-${{ github.ref }}
+  group: nexora-android-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   android:
-    name: Godot 4.3 tests and Android APK
+    name: Godot 4.3 tests and NEXORA Android APK
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     container:
@@ -183,11 +183,76 @@ jobs:
           path = Path("tests/save_recovery_test.gd")
           source = path.read_text(encoding="utf-8")
           duplicate_free_block = "    shop_reload.free()\n    collection_state.free()\n    migration_v7_state.free()\n    arcade_state.free()"
-          if duplicate_free_block not in source:
-              raise SystemExit("Duplicate-free cleanup block not found")
-          source = source.replace(duplicate_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
-          path.write_text(source, encoding="utf-8")
+          if duplicate_free_block in source:
+              source = source.replace(duplicate_free_block, "    shop_reload.free()\n    arcade_state.free()", 1)
+              path.write_text(source, encoding="utf-8")
           PY
+
+      - name: Apply v0.8.0 redesign and campaign fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-01 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02a project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-02b project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-03 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-04 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-05 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-06 project-payload/LuckyPull_v0.8.0.patch.xz.b64.part-07 > "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64"
+          base64 --decode "${RUNNER_TEMP}/luckypull-v080.patch.xz.b64" > "${RUNNER_TEMP}/luckypull-v080.patch.xz"
+          echo "bea1e539b9b5fdd4beff89bb41bb68b097f1f5d20ac5a5569afeac6c99f90a3f  ${RUNNER_TEMP}/luckypull-v080.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/luckypull-v080.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/luckypull-v080.patch.xz" > "${RUNNER_TEMP}/luckypull-v080.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/luckypull-v080.patch"
+          patch --batch --forward -p1 < "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-translation-fix.patch"
+          cat "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-01" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-02" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-03" "${GITHUB_WORKSPACE}/project-payload/LuckyPull_v0.8.0-app-icon.b64.part-04" > "${RUNNER_TEMP}/luckypull-icon.b64"
+          base64 --decode "${RUNNER_TEMP}/luckypull-icon.b64" > "${RUNNER_TEMP}/luckypull-icon.png"
+          echo "89333f6e53f4f1dc7b90fbc1b4cde79024dd32c2bad1e0b32e80d48bf6eb5bd4  ${RUNNER_TEMP}/luckypull-icon.png" | sha256sum --check -
+          install -m 0644 "${RUNNER_TEMP}/luckypull-icon.png" "${PROJECT_DIR}/assets/app_icon.png"
+          grep -qx 'config/version="0.8.0"' project.godot
+          grep -qx 'version/name="0.8.0"' export_presets.cfg
+          grep -qx 'version/code=15' export_presets.cfg
+          grep -qx 'permissions/internet=false' export_presets.cfg
+
+      - name: Apply NEXORA 0.9.0 — Worlds United rebrand
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64 \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-01a \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-01b \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-01c \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-02 \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-03 \
+            project-payload/NEXORA_v0.9.0_rebrand.patch.xz.b64.part-04 \
+            > "${RUNNER_TEMP}/nexora-v090.patch.xz.b64"
+          base64 --decode "${RUNNER_TEMP}/nexora-v090.patch.xz.b64" > "${RUNNER_TEMP}/nexora-v090.patch.xz"
+          echo "04fd41e6759cbf7be4edd6edc133401178adb2112a1776c75f0eb393bc7d9afb  ${RUNNER_TEMP}/nexora-v090.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/nexora-v090.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/nexora-v090.patch.xz" > "${RUNNER_TEMP}/nexora-v090.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v090.patch"
+          patch --batch --forward -p1 < "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0-package-identity.patch"
+          cat \
+            "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0_icon.png.b64.part-00" \
+            "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0_icon.png.b64.part-01" \
+            "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0_icon.png.b64.part-02" \
+            "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0_icon.png.b64.part-03" \
+            "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.0_icon.png.b64.part-04" \
+            > "${RUNNER_TEMP}/nexora-icon.png.b64"
+          base64 --decode "${RUNNER_TEMP}/nexora-icon.png.b64" > "${RUNNER_TEMP}/nexora-icon.png"
+          echo "3e800826c1c796c3e8c3cc9342346ef3ba3032eced361fef2842d4caf04d7f7c  ${RUNNER_TEMP}/nexora-icon.png" | sha256sum --check -
+          install -m 0644 "${RUNNER_TEMP}/nexora-icon.png" "${PROJECT_DIR}/assets/app_icon.png"
+          rm -f "${PROJECT_DIR}/assets/app_icon.png.import"
+          godot --headless --editor --path . --quit
+          grep -qx 'config/name="NEXORA | نيكسورا - عوالم متحدة"' project.godot
+          grep -qx 'config/version="0.9.0"' project.godot
+          grep -qx 'version/name="0.9.0"' export_presets.cfg
+          grep -qx 'version/code=16' export_presets.cfg
+          grep -qx 'package/name="NEXORA"' export_presets.cfg
+          grep -qx 'package/unique_name="com.nexora.worlds"' export_presets.cfg
+          grep -qx 'permissions/internet=false' export_presets.cfg
+          grep -q 'class_name NexoraState' scripts/game_state.gd
+          grep -q 'func _mode_tile' scripts/main.gd
+          [[ "$(grep -c '_mode_tile(modes_grid' scripts/main.gd)" -eq 6 ]]
+          ! grep -q 'Lucky Pull' scripts/main.gd
+          test -s assets/app_icon.png
 
       - name: Run automated game and save tests
         shell: bash
@@ -200,7 +265,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.6.0-Reconstructed-Source
+          name: NEXORA-v0.9.0-Reconstructed-Project
           path: .build-source/LuckyPull_Godot4
           if-no-files-found: error
           retention-days: 7
@@ -222,7 +287,7 @@ jobs:
             -alias androiddebugkey \
             -keypass android \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Lucky Pull,C=IQ"
+            -dname "CN=Android Debug,O=NEXORA,C=IQ"
 
       - name: Export and verify APK
         shell: bash
@@ -234,10 +299,10 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/LuckyPull-Android-v0.6.0.apk"
-          test -s build/LuckyPull-Android-v0.6.0.apk
-          unzip -t build/LuckyPull-Android-v0.6.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/LuckyPull-Android-v0.6.0.apk | awk '{print $1}')"
+          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.0.apk"
+          test -s build/NEXORA-Android-v0.9.0.apk
+          unzip -t build/NEXORA-Android-v0.9.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -247,13 +312,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/LuckyPull-Android-v0.6.0.apk
-          printf '### Lucky Pull 0.6.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
+          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.0.apk
+          printf '### NEXORA 0.9.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: LuckyPull-v0.6.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/LuckyPull-Android-v0.6.0.apk
+          name: NEXORA-v0.9.0-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.0.apk
           if-no-files-found: error
           retention-days: 30

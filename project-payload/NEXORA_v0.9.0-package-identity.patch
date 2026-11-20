@@ -1,0 +1,79 @@
+--- a/export_presets.cfg
++++ b/export_presets.cfg
+@@ -33,7 +33,7 @@
+ architectures/x86_64=false
+ version/code=16
+ version/name="0.9.0"
+-package/unique_name="com.luckypull.mobile"
++package/unique_name="com.nexora.worlds"
+ package/name="NEXORA"
+ package/signed=true
+ launcher_icons/main_192x192="res://assets/app_icon.png"
+--- a/README.md
++++ b/README.md
+@@ -13,14 +13,14 @@
+ 
+ ## Android build
+ - Godot: 4.3
+-- Package ID: `com.luckypull.mobile` (kept stable for continuity with existing installs)
++- Package ID: `com.nexora.worlds`
+ - Display name: `NEXORA`
+ - Version: `0.9.0` (code 16)
+ - Architectures: ARMv7 and ARM64
+ - Internet permission: disabled
+ 
+-## Save compatibility
+-The existing `user://lucky_pull_save.json` save key and settings path are intentionally unchanged. Do not rename them: this allows the same Android package to locate existing progress when installed as an update with a compatible signing key.
++## Installation and save data
++NEXORA uses a new Android package ID and installs alongside the previous Lucky Pull app. The previous app and its local save remain untouched unless you manually uninstall that older app. NEXORA starts a fresh local save under its own Android app storage; it does not automatically import the previous app's progress.
+ 
+ ## Safety
+ The game uses virtual rewards only. It has no cash prizes, betting, paid pass, or real-money wagering. All core progression is local and offline.
+--- a/BUILD_STATUS.md
++++ b/BUILD_STATUS.md
+@@ -4,9 +4,9 @@
+ - New launcher icon: multi-mode fantasy portal with hero card, fortress and treasure chest
+ - New indigo / violet / cyan / gold visual identity
+ - New home page mode hub: campaign, collection, missions, chests, season and store
+-- Summoning remains the reward/hero-recruitment mechanic in the world hub
+-- Package ID kept stable as `com.luckypull.mobile` to avoid changing app identity
+-- Legacy save filename retained for progress continuity
++- Summoning remains the hero-recruitment mechanic within the unified game
++- Android package ID: `com.nexora.worlds` (installs beside the former Lucky Pull package)
++- Fresh NEXORA save sandbox; previous app data remains with the old app
+ - Version: 0.9.0 / code 16
+ - Offline-only: internet permission disabled
+-- Requires Godot 4.3 CI import, scripted regression tests and Android signature verification
++- Godot 4.3 import, save/game regression tests, main-scene launch, APK export and signature verification: passed in GitHub Actions run 44804134028
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2,12 +2,12 @@
+ 
+ ## 0.9.0 — NEXORA: Worlds United
+ - Replaced Lucky Pull brand with NEXORA / نيكسورا: عوالم متحدة.
+-- Replaced the launcher icon with a fantasy nexus that visually combines hero cards, a fortress, treasure and a central portal.
+-- Introduced a royal indigo, violet, cyan and gold visual system.
++- Replaced the launcher icon with a nexus artwork combining hero card, fortress, treasure and portal.
++- Replaced the visual system with royal indigo, violet, cyan and gold.
+ - Rebuilt the home experience as a world hub with direct entry to all six modes.
+-- Unified labels and identity across the hero summoning, card collection, tower-defense campaign, chests, missions, season and store.
+-- Kept the package ID, save filenames and settings path stable to support continuity with previous progress.
+-- Incremented Android version code to 16.
++- Unified labels and identity across hero summoning, card collection, tower defense, chests, missions, season and store.
++- Assigned a new Android package ID so NEXORA installs alongside the previous game without removing it.
++- Version code 16.
+ 
+ ## 0.8.0
+ - Previous mobile-first redesign and unified Spell Bastion campaign.
+--- a/APPLY_UPDATE.txt
++++ b/APPLY_UPDATE.txt
+@@ -1,7 +1,5 @@
+ NEXORA v0.9.0 — Worlds United
+ 
+-This is a complete Godot 4.3 project, not a partial patch. Open project.godot in Godot 4.3 and export the Android preset.
++This is a complete Godot 4.3 project. Open project.godot in Godot 4.3 and export the Android preset.
+ 
+-The app display name, launcher icon, visual palette, home hub, mode navigation, UI copy and project documents have been rebranded.
+-
+-The Android application ID remains com.luckypull.mobile and the save filename remains user://lucky_pull_save.json intentionally. Do not change either when preparing an update intended to retain the existing local save.
++NEXORA uses the new Android package ID com.nexora.worlds. It installs as a separate app alongside Lucky Pull, leaving the older app and its saved progress untouched. NEXORA starts its own local save; there is no automatic cross-app save migration.
