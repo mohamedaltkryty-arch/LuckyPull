@@ -254,6 +254,40 @@ jobs:
           ! grep -q 'Lucky Pull' scripts/main.gd
           test -s assets/app_icon.png
 
+      - name: Apply NEXORA 0.10.0 Core Journey and Roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            project-payload/NEXORA_v0.10.0_core_roots.part-00 \
+            project-payload/NEXORA_v0.10.0_core_roots.part-01 \
+            project-payload/NEXORA_v0.10.0_core_roots.part-02 \
+            project-payload/NEXORA_v0.10.0_core_roots.part-03 \
+            > "${RUNNER_TEMP}/nexora-v010.patch.xz.b64"
+          base64 --decode "${RUNNER_TEMP}/nexora-v010.patch.xz.b64" > "${RUNNER_TEMP}/nexora-v010.patch.xz"
+          echo "125deec7cf1abb72b2aa6f2ee5933e6b7a3a3fcfe5955de18f82f94b998dae18  ${RUNNER_TEMP}/nexora-v010.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/nexora-v010.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/nexora-v010.patch.xz" > "${RUNNER_TEMP}/nexora-v010.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v010.patch"
+          grep -qx 'config/version="0.10.0"' project.godot
+          grep -qx 'version/name="0.10.0"' export_presets.cfg
+          grep -qx 'version/code=17' export_presets.cfg
+          grep -qx 'const SAVE_VERSION := 10' scripts/game_state.gd
+          grep -q 'func purchase_root_node' scripts/game_state.gd
+          grep -q 'func _render_roots' scripts/main.gd
+          grep -q 'func _render_house' scripts/main.gd
+          grep -q 'TEST_MARKER_20' tests/save_recovery_test.gd
+          ! grep -q '_mode_tile(modes_grid' scripts/main.gd
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          source = Path("scripts/main.gd").read_text(encoding="utf-8")
+          items = re.findall(r'\["(home|house|cards|chests|roots)",', source)
+          assert items == ["home", "house", "cards", "chests", "roots"], items
+          assert "com.nexora.worlds" in Path("export_presets.cfg").read_text(encoding="utf-8")
+          PY
+
       - name: Run automated game and save tests
         shell: bash
         run: |
@@ -265,7 +299,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Reconstructed-Project
+          name: NEXORA-v0.10.0-Reconstructed-Project
           path: .build-source/LuckyPull_Godot4
           if-no-files-found: error
           retention-days: 7
@@ -299,10 +333,10 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.0.apk"
-          test -s build/NEXORA-Android-v0.9.0.apk
-          unzip -t build/NEXORA-Android-v0.9.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.0.apk | awk '{print $1}')"
+          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.10.0.apk"
+          test -s build/NEXORA-Android-v0.10.0.apk
+          unzip -t build/NEXORA-Android-v0.10.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.10.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -312,13 +346,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.0.apk
-          printf '### NEXORA 0.9.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
+          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.10.0.apk
+          printf '### NEXORA 0.10.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.0.apk
+          name: NEXORA-v0.10.0-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.10.0.apk
           if-no-files-found: error
           retention-days: 30
