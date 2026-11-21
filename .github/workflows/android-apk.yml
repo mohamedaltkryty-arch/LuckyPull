@@ -269,7 +269,7 @@ jobs:
           cd "${PROJECT_DIR}"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100-core.patch"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100-ui.patch"
-          base64 --decode project-payload/NEXORA_v0.10.0_boss_choice.patch.xz.b64 > "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz"
+          base64 --decode "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.10.0_boss_choice.patch.xz.b64" > "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz"
           echo "24f1282c7751b2cac40e45ca026d413b05c222d73eb5704de0c86344a3871e68  ${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz" | sha256sum --check -
           xz --test "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz"
           xz --decompress --stdout "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz" > "${RUNNER_TEMP}/nexora-v100-boss-choice.patch"
