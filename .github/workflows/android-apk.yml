@@ -259,7 +259,7 @@ jobs:
         run: |
           set -euo pipefail
           base64 --decode "${GITHUB_WORKSPACE}/NEXORA_v1.0.0_luck_cards.patch.xz.b64" > "${RUNNER_TEMP}/nexora-v100.patch.xz"
-          echo "bb60a5fac17bac333c504b48d7268769115a17eed5eebe44f8419c157b120a70  ${RUNNER_TEMP}/nexora-v100.patch.xz" | sha256sum --check -
+          echo "632f0a8408c89050b64b6f09514b396a602e781275836f0d71242fb6bc10795f  ${RUNNER_TEMP}/nexora-v100.patch.xz" | sha256sum --check -
           xz --test "${RUNNER_TEMP}/nexora-v100.patch.xz"
           xz --decompress --stdout "${RUNNER_TEMP}/nexora-v100.patch.xz" > "${RUNNER_TEMP}/nexora-v100.patch"
           cd "${PROJECT_DIR}"
