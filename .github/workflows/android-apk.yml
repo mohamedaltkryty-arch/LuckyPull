@@ -261,6 +261,7 @@ jobs:
           cat \
             project-payload/NEXORA_v0.10.0_core_roots.part-00 \
             project-payload/NEXORA_v0.10.0_core_roots.part-01 \
+            project-payload/NEXORA_v0.10.0_core_roots.part-01b \
             project-payload/NEXORA_v0.10.0_core_roots.part-02 \
             project-payload/NEXORA_v0.10.0_core_roots.part-03 \
             > "${RUNNER_TEMP}/nexora-v010.patch.xz.b64"
