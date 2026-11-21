@@ -1,0 +1,26 @@
+diff -ruN nexora-work/scripts/main.gd nexora-work-fixed/scripts/main.gd
+--- nexora-work/scripts/main.gd	2026-11-21 17:47:26.908869811 +0000
++++ nexora-work-fixed/scripts/main.gd	2026-11-21 18:03:07.187331811 +0000
+@@ -350,7 +350,9 @@
+     profile_badge.mouse_filter = Control.MOUSE_FILTER_STOP
+     profile_badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+     profile_badge.add_theme_stylebox_override("panel", _stylebox(Color("#302956"), 15, CYAN, 1))
+-    profile_badge.add_child(_label("✦", 22, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER))
++    var profile_icon := _label("✦", 22, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
++    profile_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
++    profile_badge.add_child(profile_icon)
+     profile_badge.gui_input.connect(_on_profile_badge_input)
+     header.add_child(profile_badge)
+ 
+diff -ruN nexora-work/tests/save_recovery_test.gd nexora-work-fixed/tests/save_recovery_test.gd
+--- nexora-work/tests/save_recovery_test.gd	2026-11-21 17:46:36.029981023 +0000
++++ nexora-work-fixed/tests/save_recovery_test.gd	2026-11-21 18:03:07.184054111 +0000
+@@ -743,7 +743,7 @@
+         _fail("Could not start a battle for root victory reward verification")
+         return
+     root_reload.arcade["spell_enemy_hp"] = 1
+-    var coins_before_root_victory := root_reload.coins
++    var coins_before_root_victory: int = int(root_reload.coins)
+     var root_victory: Dictionary = root_reload.cast_spell("fire")
+     if not bool(root_victory.get("won", false)) or root_reload.coins - coins_before_root_victory != 25 or int(root_reload.arcade.get("spell_mana", 0)) != 98:
+         _fail("Luck, bond or aether root bonuses were not applied to victory rewards and mana")
