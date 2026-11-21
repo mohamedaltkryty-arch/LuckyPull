@@ -254,6 +254,30 @@ jobs:
           ! grep -q 'Lucky Pull' scripts/main.gd
           test -s assets/app_icon.png
 
+      - name: Apply NEXORA 1.0.0 Luck Cards update
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 --decode "${GITHUB_WORKSPACE}/NEXORA_v1.0.0_luck_cards.patch.xz.b64" > "${RUNNER_TEMP}/nexora-v100.patch.xz"
+          echo "bb60a5fac17bac333c504b48d7268769115a17eed5eebe44f8419c157b120a70  ${RUNNER_TEMP}/nexora-v100.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/nexora-v100.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/nexora-v100.patch.xz" > "${RUNNER_TEMP}/nexora-v100.patch"
+          cd "${PROJECT_DIR}"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100.patch"
+          grep -qx 'config/version="1.0.0"' project.godot
+          grep -qx 'version/name="1.0.0"' export_presets.cfg
+          grep -qx 'version/code=17' export_presets.cfg
+          grep -qx 'permissions/internet=false' export_presets.cfg
+          grep -qx 'const SAVE_VERSION := 10' scripts/game_state.gd
+          grep -q 'LUCK_CARD_ODDS' scripts/game_state.gd
+          grep -q 'LUCK_CARD_PITY_THRESHOLDS' scripts/game_state.gd
+          grep -q 'func try_luck_card_reward' scripts/game_state.gd
+          grep -q 'func get_luck_pity_info' scripts/game_state.gd
+          grep -q 'daily_elite_wins' scripts/game_state.gd
+          grep -q 'بطاقات الحظ' scripts/main.gd
+          ! grep -q 'Lucky Pull' scripts/main.gd
+          godot --headless --editor --path . --quit
+
       - name: Run automated game and save tests
         shell: bash
         run: |
@@ -265,7 +289,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Reconstructed-Project
+          name: NEXORA-v1.0.0-Reconstructed-Project
           path: .build-source/LuckyPull_Godot4
           if-no-files-found: error
           retention-days: 7
@@ -299,10 +323,10 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.0.apk"
-          test -s build/NEXORA-Android-v0.9.0.apk
-          unzip -t build/NEXORA-Android-v0.9.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.0.apk | awk '{print $1}')"
+          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v1.0.0.apk"
+          test -s build/NEXORA-Android-v1.0.0.apk
+          unzip -t build/NEXORA-Android-v1.0.0.apk >/dev/null
+          APK_SHA256="$(sha256sum build/NEXORA-Android-v1.0.0.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -312,13 +336,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.0.apk
-          printf '### NEXORA 0.9.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
+          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v1.0.0.apk
+          printf '### NEXORA 1.0.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.0.apk
+          name: NEXORA-v1.0.0-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v1.0.0.apk
           if-no-files-found: error
           retention-days: 30
