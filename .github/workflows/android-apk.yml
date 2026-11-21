@@ -254,7 +254,7 @@ jobs:
           ! grep -q 'Lucky Pull' scripts/main.gd
           test -s assets/app_icon.png
 
-      - name: Apply NEXORA v0.10.0 Luck Cards and Arabic UI
+      - name: Apply NEXORA v0.10.0 Luck Cards, Arabic UI and persisted boss choices
         shell: bash
         run: |
           set -euo pipefail
@@ -269,6 +269,11 @@ jobs:
           cd "${PROJECT_DIR}"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100-core.patch"
           patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100-ui.patch"
+          base64 --decode project-payload/NEXORA_v0.10.0_boss_choice.patch.xz.b64 > "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz"
+          echo "24f1282c7751b2cac40e45ca026d413b05c222d73eb5704de0c86344a3871e68  ${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz" | sha256sum --check -
+          xz --test "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz"
+          xz --decompress --stdout "${RUNNER_TEMP}/nexora-v100-boss-choice.patch.xz" > "${RUNNER_TEMP}/nexora-v100-boss-choice.patch"
+          patch --batch --forward -p1 < "${RUNNER_TEMP}/nexora-v100-boss-choice.patch"
           sed -i 's/^config\/version="0.9.0"$/config\/version="0.10.0"/' project.godot
           sed -i 's/^version\/name="0.9.0"$/version\/name="0.10.0"/' export_presets.cfg
           sed -i 's/^version\/code=16$/version\/code=17/' export_presets.cfg
@@ -279,13 +284,16 @@ jobs:
           grep -qx 'version/code=17' export_presets.cfg
           grep -qx 'package/unique_name="com.nexora.worlds"' export_presets.cfg
           grep -qx 'permissions/internet=false' export_presets.cfg
-          grep -qx 'const SAVE_VERSION := 10' scripts/game_state.gd
+          grep -qx 'const SAVE_VERSION := 11' scripts/game_state.gd
           grep -q 'LUCK_CARD_ODDS' scripts/game_state.gd
           grep -q 'func get_current_luck_card_odds' scripts/game_state.gd
           grep -q 'func reveal_luck_card' scripts/game_state.gd
+          grep -q 'func choose_pending_luck_card' scripts/game_state.gd
+          grep -q 'pending_luck_card_choice' scripts/game_state.gd
           grep -q 'boss_1' scripts/game_state.gd
           grep -q 'بطاقات الحظ' scripts/main.gd
           grep -q 'func _show_reward' scripts/main.gd
+          grep -q 'func _show_boss_luck_choice' scripts/main.gd
           test -s tests/save_recovery_test.gd
 
       - name: Run automated game and save tests
