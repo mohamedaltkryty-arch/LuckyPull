@@ -283,7 +283,7 @@ jobs:
           from pathlib import Path
           import re
           source = Path("scripts/main.gd").read_text(encoding="utf-8")
-          items = re.findall(r'\["(home|house|cards|chests|roots)",', source)
+          items = re.findall(r'^\s*\["(home|house|cards|chests|roots)",', source, re.MULTILINE)
           assert items == ["home", "house", "cards", "chests", "roots"], items
           assert "com.nexora.worlds" in Path("export_presets.cfg").read_text(encoding="utf-8")
           PY
