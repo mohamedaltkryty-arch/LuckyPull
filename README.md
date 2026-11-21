@@ -1,39 +1,27 @@
-# Lucky Pull — اسحب وفز
+# NEXORA — نيكسورا: عوالم متحدة
 
-لعبة Android عربية أصلية، مبنية على Godot 4.3، تعمل دون اتصال وتخزن تقدم اللاعب محلياً.
+Android-first Arabic fantasy game built with Godot 4.3. The game is presented as one continuous **Core Journey**, not a collection of separate modes.
 
-## الإصدار الحالي: 0.6.0
+## Player navigation
+- **الرئيسية** — Start or continue the current match.
+- **المنزل** — Character progression and permanent weapon, armor and core upgrades.
+- **البطاقات** — Luck-card draws, published odds and collection.
+- **الصناديق** — Virtual-reward chests, with missions, free season and cosmetic shop.
+- **الجذور** — Five branches and fifteen persistent progression nodes.
 
-- Android APK Debug لأجهزة ARMv7 وARM64.
-- العربية RTL افتراضياً والإنجليزية LTR.
-- اللعبة فردية ولا تتطلب حساباً أو إنترنتاً أو خادماً.
-- لا مقامرة، ولا رهانات، ولا جوائز نقدية، ولا مشتريات بأموال حقيقية.
+## Fairness and save data
+- Current draw probabilities are shown before a draw.
+- Root upgrades use fixed virtual-coin costs and prerequisite checks.
+- All rewards are virtual; no betting or cash prizes.
+- Local save files include a recovery backup and versioned migrations.
+- The game works offline; no network permission is required for the current build.
 
-## محتوى اللعبة
+## Android
+- Godot 4.3
+- Package: `com.nexora.worlds`
+- Version target: 0.10.0 (version code 17)
+- ARMv7 and ARM64
+- Separate application data from the earlier Lucky Pull package.
 
-- سحب باحتمالات معلنة مجموعها 100% وضمانة بطاقة نادرة تصل إلى 100% في المحاولة الستين.
-- طاقة تتجدد، بطاقات ومجموعات، أربعة أنواع من الصناديق، موسم مجاني من 14 يوماً، ومتجر مظاهر.
-- ست مهام يومية تعمل دون إعلانات أو مزود خارجي.
-- Elemental Spell Chain: قتال سحري بسلاسل عناصر وتعويذات.
-- Tower Bastion: دفاع موجات وترقيات برج وإدارة موارد.
-- Cat Squadron: قتال تلقائي ومكافآت خمول حتى 8 ساعات ودمج أسلحة.
-- مؤثرات صوتية أصلية وإعدادات صوت واهتزاز محفوظة.
-
-## الخصوصية والحفظ
-
-لا توجد صلاحية إنترنت في إصدار Android. بيانات التقدم والإعدادات تحفظ محلياً في مساحة التطبيق. يدعم الحفظ نسخة احتياطية وترقية المخطط مع رفض استبدال بيانات أنشأتها نسخة أحدث.
-
-## بناء APK عبر GitHub Actions
-
-1. افتح تبويب Actions.
-2. شغّل Build Lucky Pull Android APK يدوياً، أو ادفع تغييراً إلى main.
-3. انتظر اكتمال استيراد المشروع واختبارات Godot وتشغيل المشهد وتصدير Android والتحقق من توقيع APK.
-4. نزّل artifact باسم LuckyPull-v0.6.0-Android-Debug-APK.
-
-يُبنى APK من أساس v0.4.4 مع تطبيق تحديث مصدر مضغوط مقسّم إلى أجزاء داخل project-payload. ينشئ مسار CI المؤثرات الصوتية الحتمية قبل استيراد موارد Godot.
-
-## حدود الإصدار
-
-- Artifact الحالي هو APK Debug بمفتاح مؤقت؛ لا تستخدمه كتحديث فوق إصدار موقّع بمفتاح مختلف.
-- لا يُعد توقيع Release دائم أو اختباراً على هاتف فعلي منجزاً إلا بعد تنفيذهما فعلياً.
-- لا يوجد مزود إعلانات أو حسابات أو مزامنة سحابية.
+## Not integrated yet
+Google Play Games sign-in, cloud synchronization, Google Play Billing and AdMob are planned but are not included in this offline milestone.
