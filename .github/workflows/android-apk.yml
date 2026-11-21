@@ -259,7 +259,7 @@ jobs:
         run: |
           set -euo pipefail
           base64 --decode project-payload/NEXORA_v0.10.0_core.patch.xz.b64 > "${RUNNER_TEMP}/nexora-v100-core.patch.xz"
-          echo "b82d05a72ebea0f1bde7b33967f3b694ffa88ce43644c4854cab7592ec9f6425  ${RUNNER_TEMP}/nexora-v100-core.patch.xz" | sha256sum --check -
+          echo "fcf3528425bb6ad222ff41669b8879853880195847a37f8d8be3cc4de6af0ea0  ${RUNNER_TEMP}/nexora-v100-core.patch.xz" | sha256sum --check -
           xz --test "${RUNNER_TEMP}/nexora-v100-core.patch.xz"
           xz --decompress --stdout "${RUNNER_TEMP}/nexora-v100-core.patch.xz" > "${RUNNER_TEMP}/nexora-v100-core.patch"
           base64 --decode project-payload/NEXORA_v0.10.0_ui.patch.xz.b64 > "${RUNNER_TEMP}/nexora-v100-ui.patch.xz"
