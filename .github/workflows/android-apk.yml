@@ -265,6 +265,7 @@ jobs:
           grep -qx 'version/code=17' export_presets.cfg
           grep -q 'func _capture_save_snapshot' scripts/game_state.gd
           grep -q 'TEST_MARKER_8A' tests/save_recovery_test.gd
+          grep -q 'elif state.save_recovery_blocked' scripts/main.gd
           grep -q 'NEXORA v0.9.1' BUILD_STATUS.md
 
       - name: Run automated game and save tests
