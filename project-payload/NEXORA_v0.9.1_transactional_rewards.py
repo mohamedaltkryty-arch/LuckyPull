@@ -270,6 +270,18 @@ replace_once("tests/save_recovery_test.gd", """func _clear_test_saves() -> bool:
     for path in [SAVE_PATH, BACKUP_SAVE_PATH, TEMP_SAVE_PATH]:
 """)
 
+replace_once("scripts/main.gd", """    if state.claim_daily_reward():
+        _show_message("وصلتك 5 سحبات إضافية وصندوق عادي مجاني. استمتع بجائزتك!")
+    else:
+        _show_message("تم استلام هدية اليوم بالفعل. عد غداً لهدية جديدة.")
+""", """    if state.claim_daily_reward():
+        _show_message("وصلتك 5 سحبات إضافية وصندوق عادي مجاني. استمتع بجائزتك!")
+    elif state.save_recovery_blocked:
+        _show_message(state.save_warning)
+    else:
+        _show_message("تم استلام هدية اليوم بالفعل. عد غداً لهدية جديدة.")
+""")
+
 replace_once("project.godot", 'config/version="0.9.0"', 'config/version="0.9.1"')
 replace_once("export_presets.cfg", 'export_path="build/NEXORA-Android-v0.9.0.apk"', 'export_path="build/NEXORA-Android-v0.9.1.apk"')
 replace_once("export_presets.cfg", "version/code=16", "version/code=17")
