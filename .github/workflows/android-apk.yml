@@ -279,7 +279,7 @@ jobs:
           grep -qx 'version/code=18' export_presets.cfg
           grep -q 'TEST_MARKER_8B' tests/save_recovery_test.gd
           grep -q 'time_failure_temp_absolute' tests/save_recovery_test.gd
-          grep -q 'transaction-safe time progression' CHANGELOG.md
+          grep -qi 'transaction-safe time progression' CHANGELOG.md
 
       - name: Run automated game and save tests
         shell: bash
