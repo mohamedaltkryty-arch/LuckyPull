@@ -254,6 +254,20 @@ jobs:
           ! grep -q 'Lucky Pull' scripts/main.gd
           test -s assets/app_icon.png
 
+      - name: Apply NEXORA 0.9.1 transactional reward-save update
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "${GITHUB_WORKSPACE}/project-payload/NEXORA_v0.9.1_transactional_rewards.py" "${PROJECT_DIR}"
+          cd "${PROJECT_DIR}"
+          grep -qx 'config/version="0.9.1"' project.godot
+          grep -qx 'version/name="0.9.1"' export_presets.cfg
+          grep -qx 'version/code=17' export_presets.cfg
+          grep -q 'func _capture_save_snapshot' scripts/game_state.gd
+          grep -q 'TEST_MARKER_8A' tests/save_recovery_test.gd
+          grep -q 'elif state.save_recovery_blocked' scripts/main.gd
+          grep -q 'NEXORA v0.9.1' BUILD_STATUS.md
+
       - name: Run automated game and save tests
         shell: bash
         run: |
@@ -265,7 +279,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Reconstructed-Project
+          name: NEXORA-v0.9.1-Reconstructed-Project
           path: .build-source/LuckyPull_Godot4
           if-no-files-found: error
           retention-days: 7
@@ -299,10 +313,10 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.0.apk"
-          test -s build/NEXORA-Android-v0.9.0.apk
-          unzip -t build/NEXORA-Android-v0.9.0.apk >/dev/null
-          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.0.apk | awk '{print $1}')"
+          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.1.apk"
+          test -s build/NEXORA-Android-v0.9.1.apk
+          unzip -t build/NEXORA-Android-v0.9.1.apk >/dev/null
+          APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.1.apk | awk '{print $1}')"
           APK_SIGNER=""
           if [[ -n "${ANDROID_HOME:-}" && -x "${ANDROID_HOME}/build-tools/34.0.0/apksigner" ]]; then
             APK_SIGNER="${ANDROID_HOME}/build-tools/34.0.0/apksigner"
@@ -312,13 +326,13 @@ jobs:
             APK_SIGNER="$(find /root /opt /usr/lib -type f -name apksigner -perm -u+x 2>/dev/null | head -n 1 || true)"
           fi
           test -n "${APK_SIGNER}"
-          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.0.apk
-          printf '### NEXORA 0.9.0 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
+          "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.1.apk
+          printf '### NEXORA 0.9.1 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.0-Android-Debug-APK
-          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.0.apk
+          name: NEXORA-v0.9.1-Android-Debug-APK
+          path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.1.apk
           if-no-files-found: error
           retention-days: 30
