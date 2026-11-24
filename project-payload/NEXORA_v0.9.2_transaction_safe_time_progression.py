@@ -151,7 +151,7 @@ insert_tests = """    # Time-based and calendar resets must also roll back when 
     var failed_energy_state = state_script.new()
     failed_energy_state.energy = 5
     failed_energy_state.last_energy_timestamp = now_timestamp - int(failed_energy_state.REGEN_SECONDS) * 2
-    var previous_energy_timestamp := failed_energy_state.last_energy_timestamp
+    var previous_energy_timestamp: int = int(failed_energy_state.last_energy_timestamp)
     if DirAccess.make_dir_absolute(time_failure_temp_absolute) != OK:
         _fail("Could not create the save-path collision for energy regeneration test")
         return
@@ -192,7 +192,7 @@ insert_tests = """    # Time-based and calendar resets must also roll back when 
     failed_season_rollover_state.season_points = 450
     failed_season_rollover_state.season_claimed_tiers = {"1":true,"2":true}
     failed_season_rollover_state.season_bonus_chest_claimed = true
-    var previous_season_start := failed_season_rollover_state.season_start_timestamp
+    var previous_season_start: int = int(failed_season_rollover_state.season_start_timestamp)
     if DirAccess.make_dir_absolute(time_failure_temp_absolute) != OK:
         _fail("Could not create the save-path collision for season rollover test")
         return
