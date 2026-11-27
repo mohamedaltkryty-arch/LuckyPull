@@ -326,8 +326,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base64 --decode project-payload/NEXORA_v0.9.5_luck_card_deck_combat.patch.xz.b64 > "$RUNNER_TEMP/nexora-v095.patch.xz"
-          echo "5abadfd04dc1b14a96ded8330e7d1556c3913344bf19b3a0f703181929bedd40  $RUNNER_TEMP/nexora-v095.patch.xz" | sha256sum --check -
+          cat project-payload/NEXORA_v0.9.5_luck_card_deck_combat.patch.part* > "$RUNNER_TEMP/nexora-v095.patch.xz.b64"
+          base64 --decode "$RUNNER_TEMP/nexora-v095.patch.xz.b64" > "$RUNNER_TEMP/nexora-v095.patch.xz"
+          echo "45fbea285a85f7e4310b36836e215b541117f54bd9f66650e3b6d8a234f0f58a  $RUNNER_TEMP/nexora-v095.patch.xz" | sha256sum --check -
           xz --test "$RUNNER_TEMP/nexora-v095.patch.xz"
           xz --decompress --stdout "$RUNNER_TEMP/nexora-v095.patch.xz" > "$RUNNER_TEMP/nexora-v095.patch"
           cd "$PROJECT_DIR"
