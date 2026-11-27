@@ -322,6 +322,29 @@ jobs:
           grep -q 'NEXORA v0.9.4' BUILD_STATUS.md
           grep -qx 'permissions/internet=false' export_presets.cfg
 
+      - name: Apply NEXORA 0.9.5 Luck Card loadouts and combat integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat project-payload/NEXORA_v0.9.5_luck_card_loadouts.part01.b64 project-payload/NEXORA_v0.9.5_luck_card_loadouts.part02.b64 project-payload/NEXORA_v0.9.5_luck_card_loadouts.part03.b64 project-payload/NEXORA_v0.9.5_luck_card_loadouts.part04.b64 project-payload/NEXORA_v0.9.5_luck_card_loadouts.part05.b64 > "$RUNNER_TEMP/nexora-v095.patch.xz.b64"
+          base64 --decode "$RUNNER_TEMP/nexora-v095.patch.xz.b64" > "$RUNNER_TEMP/nexora-v095.patch.xz"
+          echo "f04d9f5704d00fbbadeab70465b7ede7838c8a6a4ad1a0fcb39a67d2af7a8fe4  $RUNNER_TEMP/nexora-v095.patch.xz" | sha256sum --check -
+          xz --test "$RUNNER_TEMP/nexora-v095.patch.xz"
+          xz --decompress --stdout "$RUNNER_TEMP/nexora-v095.patch.xz" > "$RUNNER_TEMP/nexora-v095.patch"
+          cd "$PROJECT_DIR"
+          patch --batch --forward -p1 < "$RUNNER_TEMP/nexora-v095.patch"
+          grep -qx 'config/version="0.9.5"' project.godot
+          grep -qx 'version/name="0.9.5"' export_presets.cfg
+          grep -qx 'version/code=21' export_presets.cfg
+          grep -q 'const SAVE_VERSION := 12' scripts/game_state.gd
+          grep -q 'func equip_luck_card' scripts/game_state.gd
+          grep -q 'func get_active_luck_card_effects' scripts/game_state.gd
+          grep -q 'func calculate_luck_spell_damage' scripts/game_state.gd
+          grep -q 'func _render_luck_loadout_panel' scripts/main.gd
+          grep -q 'TEST_MARKER_21' tests/save_recovery_test.gd
+          grep -q 'NEXORA v0.9.5' BUILD_STATUS.md
+          grep -qx 'permissions/internet=false' export_presets.cfg
+
       - name: Run automated game and save tests
         shell: bash
         run: |
@@ -333,7 +356,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.4-Reconstructed-Project
+          name: NEXORA-v0.9.5-Reconstructed-Project
           path: .build-source/LuckyPull_Godot4
           if-no-files-found: error
           retention-days: 7
@@ -367,7 +390,7 @@ jobs:
           set -euo pipefail
           cd "${PROJECT_DIR}"
           mkdir -p build
-          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.4.apk"
+          godot --headless --verbose --path . --export-debug "Android" "build/NEXORA-Android-v0.9.5.apk"
           test -s build/NEXORA-Android-v0.9.4.apk
           unzip -t build/NEXORA-Android-v0.9.4.apk >/dev/null
           APK_SHA256="$(sha256sum build/NEXORA-Android-v0.9.4.apk | awk '{print $1}')"
@@ -381,12 +404,12 @@ jobs:
           fi
           test -n "${APK_SIGNER}"
           "${APK_SIGNER}" verify --verbose build/NEXORA-Android-v0.9.4.apk
-          printf '### NEXORA 0.9.4 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
+          printf '### NEXORA 0.9.5 APK\n\n- Godot import, automated tests, scene launch: passed\n- APK export and signature verification: passed\n- SHA-256: `%s`\n' "${APK_SHA256}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload installable APK only
         uses: actions/upload-artifact@v4
         with:
-          name: NEXORA-v0.9.4-Android-Debug-APK
+          name: NEXORA-v0.9.5-Android-Debug-APK
           path: .build-source/LuckyPull_Godot4/build/NEXORA-Android-v0.9.4.apk
           if-no-files-found: error
           retention-days: 30
