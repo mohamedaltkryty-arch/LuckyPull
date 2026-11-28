@@ -339,15 +339,16 @@ jobs:
           xz --decompress --stdout "$RUNNER_TEMP/nexora-v095-core-hp.patch.xz" > "$RUNNER_TEMP/nexora-v095-core-hp.patch"
           python3 - <<'PY'
           from pathlib import Path
+          import os
           import re
-          patch_path = Path("${RUNNER_TEMP}/nexora-v095-core-hp.patch")
+          patch_path = Path(os.environ["RUNNER_TEMP"]) / "nexora-v095-core-hp.patch"
           source = patch_path.read_text(encoding="utf-8")
           sections = re.split(r"(?=^--- )", source, flags=re.MULTILINE)
           test_sections = [part for part in sections if part.startswith("--- tests/save_recovery_test.gd")]
           if len(test_sections) != 1:
               raise SystemExit("Expected exactly one test-file section in core HP follow-up patch")
           filtered = "".join(part for part in sections if not part.startswith("--- tests/save_recovery_test.gd"))
-          Path("${RUNNER_TEMP}/nexora-v095-core-hp-apply.patch").write_text(filtered, encoding="utf-8")
+          (Path(os.environ["RUNNER_TEMP"]) / "nexora-v095-core-hp-apply.patch").write_text(filtered, encoding="utf-8")
           PY
           patch --batch --forward -p1 < "$RUNNER_TEMP/nexora-v095-core-hp-apply.patch"
           python3 - <<'PY'
