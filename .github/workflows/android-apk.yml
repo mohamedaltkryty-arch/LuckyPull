@@ -382,6 +382,8 @@ jobs:
           source = source.replace(old_block, new_block, 1)
           path.write_text(source, encoding="utf-8")
           PY
+          sed -i 's/var equipped_effects := loadout_state.get_active_luck_card_effects()/var equipped_effects: Dictionary = loadout_state.get_active_luck_card_effects()/' tests/save_recovery_test.gd
+          grep -q 'var equipped_effects: Dictionary = loadout_state.get_active_luck_card_effects()' tests/save_recovery_test.gd
           grep -q 'Fortress Covenant core HP bonus was not preserved after reload' tests/save_recovery_test.gd
           grep -q 'Core upgrade did not preserve full HP proportionally with Fortress Covenant equipped' tests/save_recovery_test.gd
           grep -qx 'config/version="0.9.5"' project.godot
