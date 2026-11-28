@@ -337,7 +337,52 @@ jobs:
           echo "d32baa3105615bf1ab6bb70234d6c74a8b2ea36b59be525cc60ed0f20e40ddac  $RUNNER_TEMP/nexora-v095-core-hp.patch.xz" | sha256sum --check -
           xz --test "$RUNNER_TEMP/nexora-v095-core-hp.patch.xz"
           xz --decompress --stdout "$RUNNER_TEMP/nexora-v095-core-hp.patch.xz" > "$RUNNER_TEMP/nexora-v095-core-hp.patch"
-          patch --batch --forward -p1 < "$RUNNER_TEMP/nexora-v095-core-hp.patch"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          patch_path = Path("${RUNNER_TEMP}/nexora-v095-core-hp.patch")
+          source = patch_path.read_text(encoding="utf-8")
+          sections = re.split(r"(?=^--- )", source, flags=re.MULTILINE)
+          test_sections = [part for part in sections if part.startswith("--- tests/save_recovery_test.gd")]
+          if len(test_sections) != 1:
+              raise SystemExit("Expected exactly one test-file section in core HP follow-up patch")
+          filtered = "".join(part for part in sections if not part.startswith("--- tests/save_recovery_test.gd"))
+          Path("${RUNNER_TEMP}/nexora-v095-core-hp-apply.patch").write_text(filtered, encoding="utf-8")
+          PY
+          patch --batch --forward -p1 < "$RUNNER_TEMP/nexora-v095-core-hp-apply.patch"
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("tests/save_recovery_test.gd")
+          source = path.read_text(encoding="utf-8")
+          old_block = """    if loadout_state.select_luck_loadout(0).get("ok", false) != true:
+                  _fail("Could not restore the first saved loadout")
+                  return
+              loadout_state.free()
+          """
+          new_block = """    loadout_state.free()
+
+              var fortress_reload = state_script.new()
+              fortress_reload.load_game()
+              if fortress_reload.get_tower_core_max_hp() != 150 or int(fortress_reload.arcade.get("tower_hp", 0)) != 150:
+                  _fail("Fortress Covenant core HP bonus was not preserved after reload")
+                  return
+              fortress_reload.coins = 1000
+              var core_upgrade_result: Dictionary = fortress_reload.upgrade_tower("core")
+              if not bool(core_upgrade_result.get("ok", false)) or fortress_reload.get_tower_core_max_hp() != 188 or int(fortress_reload.arcade.get("tower_hp", 0)) != 188:
+                  _fail("Core upgrade did not preserve full HP proportionally with Fortress Covenant equipped")
+                  return
+              if fortress_reload.select_luck_loadout(0).get("ok", false) != true:
+                  _fail("Could not restore the first saved loadout")
+                  return
+              fortress_reload.free()
+          """
+          if source.count(old_block) != 1:
+              raise SystemExit("Could not locate the unique core-HP persistence test insertion point")
+          source = source.replace(old_block, new_block, 1)
+          path.write_text(source, encoding="utf-8")
+          PY
+          grep -q 'Fortress Covenant core HP bonus was not preserved after reload' tests/save_recovery_test.gd
+          grep -q 'Core upgrade did not preserve full HP proportionally with Fortress Covenant equipped' tests/save_recovery_test.gd
           grep -qx 'config/version="0.9.5"' project.godot
           grep -qx 'version/name="0.9.5"' export_presets.cfg
           grep -qx 'version/code=21' export_presets.cfg
